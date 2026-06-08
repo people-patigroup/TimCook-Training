@@ -3,384 +3,298 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PATI CS & Fulfillment — Decision Tree</title>
+<title>PATI — Customer Journey Decision Tree v3</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0d0f12;
-    --bg2: #13161a;
-    --bg3: #1a1e24;
-    --border: #262b32;
-    --border2: #2e343c;
-    --text: #e2e6ed;
-    --text2: #8a9099;
-    --text3: #545b64;
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg:   #0d0f12;
+  --bg2:  #13161a;
+  --bg3:  #1a1e24;
+  --bd:   #252a31;
+  --bd2:  #2e343c;
+  --text: #dde2ea;
+  --t2:   #7e8693;
+  --t3:   #3f4650;
 
-    --teal:   #1ecfaa;
-    --teal-bg: rgba(30,207,170,.08);
-    --teal-border: rgba(30,207,170,.3);
+  --ce:#4fa3e8; --ebe:rgba(79,163,232,.10); --bde:rgba(79,163,232,.38);
+  --cd:#f0a040; --ebd:rgba(240,160,64,.10); --bdd:rgba(240,160,64,.38);
+  --cr:#1ecfaa; --ebr:rgba(30,207,170,.10); --bdr:rgba(30,207,170,.38);
+  --cb:#e05252; --ebb:rgba(224,82,82,.10);  --bdb:rgba(224,82,82,.38);
+  --cx:#9b7ff4; --ebx:rgba(155,127,244,.10);--bdx:rgba(155,127,244,.38);
 
-    --amber:  #f0a040;
-    --amber-bg: rgba(240,160,64,.08);
-    --amber-border: rgba(240,160,64,.3);
+  --mono:'IBM Plex Mono',monospace;
+  --sans:'IBM Plex Sans',sans-serif;
+  --nw: 180px;   /* standard node width */
+  --gap: 24px;   /* horizontal gap between branches */
+  --conn: 28px;  /* vertical connector height */
+}
 
-    --coral:  #e05252;
-    --coral-bg: rgba(224,82,82,.08);
-    --coral-border: rgba(224,82,82,.3);
+body { background:var(--bg); color:var(--text); font-family:var(--sans); font-size:13px; line-height:1.5; }
 
-    --purple: #9b7ff4;
-    --purple-bg: rgba(155,127,244,.08);
-    --purple-border: rgba(155,127,244,.3);
+/* ── HEADER ── */
+header {
+  background:var(--bg2); border-bottom:1px solid var(--bd);
+  padding:12px 28px; display:flex; align-items:center; gap:14px;
+  position:sticky; top:0; z-index:300;
+}
+.logo { font-family:var(--mono); font-size:10px; font-weight:600; color:var(--cr);
+  letter-spacing:.12em; background:var(--ebr); border:1px solid var(--bdr);
+  padding:3px 9px; border-radius:3px; }
+header h1 { font-size:13px; font-weight:500; }
+header p  { font-size:11px; color:var(--t3); font-family:var(--mono); }
+.hbadge { margin-left:auto; font-family:var(--mono); font-size:10px; padding:3px 8px;
+  border-radius:3px; background:var(--ebb); border:1px solid var(--bdb); color:var(--cb); }
 
-    --blue:   #4fa3e8;
-    --blue-bg: rgba(79,163,232,.08);
-    --blue-border: rgba(79,163,232,.3);
+.page { padding:28px 32px 80px; }
 
-    --green:  #5cb85c;
-    --green-bg: rgba(92,184,92,.08);
-    --green-border: rgba(92,184,92,.3);
+/* ── LEGEND ── */
+.legend { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:32px;
+  padding:10px 14px; background:var(--bg2); border:1px solid var(--bd); border-radius:8px; }
+.leg { display:flex; align-items:center; gap:7px; font-family:var(--mono); font-size:10px;
+  color:var(--t2); padding:3px 8px; background:var(--bg3); border-radius:4px; }
 
-    --gray-bg: rgba(255,255,255,.04);
-    --gray-border: rgba(255,255,255,.12);
+/* ══════════════════════════════════════════
+   CORE NODE STYLES
+   All nodes are block-level, fixed width,
+   centered text. Shapes are achieved via
+   border-radius + a "shape indicator" above.
+══════════════════════════════════════════ */
 
-    --radius: 8px;
-    --font-mono: 'IBM Plex Mono', monospace;
-    --font-sans: 'IBM Plex Sans', sans-serif;
-  }
+/* shape indicator row above node */
+.shape-ind { display:flex; justify-content:center; align-items:flex-end;
+  height:14px; margin-bottom:-1px; }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+/* ○ circle indicator */
+.ind-circle { width:14px; height:14px; border-radius:50%;
+  border:2px solid var(--bde); background:var(--ebe); }
+/* □ square indicator */
+.ind-sq     { width:14px; height:14px; border-radius:2px;
+  border:2px solid var(--bdd); background:var(--ebd); }
+.ind-sq-b   { width:14px; height:14px; border-radius:2px;
+  border:2px solid var(--bdb); background:var(--ebb); }
+.ind-sq-x   { width:14px; height:14px; border-radius:2px;
+  border:2px solid var(--bdx); background:var(--ebx); }
+/* △ triangle indicator */
+.ind-tri    { width:0; height:0;
+  border-left:8px solid transparent; border-right:8px solid transparent;
+  border-bottom:14px solid var(--bdr); }
+.ind-tri-b  { width:0; height:0;
+  border-left:8px solid transparent; border-right:8px solid transparent;
+  border-bottom:14px solid var(--bdb); }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font-sans);
-    font-size: 14px;
-    line-height: 1.6;
-    min-height: 100vh;
-  }
+/* node box */
+.n {
+  width:var(--nw); padding:11px 13px; border-radius:6px; border:2px solid;
+  text-align:center; transition:filter .15s; cursor:default;
+}
+.n:hover { filter:brightness(1.12); }
+.n .ntag { font-family:var(--mono); font-size:9px; font-weight:600;
+  letter-spacing:.08em; display:block; margin-bottom:4px; }
+.n .ntitle { font-size:11px; font-weight:500; }
+.n .nbody  { font-size:10px; color:var(--t2); margin-top:3px; line-height:1.4; }
+.n .nwarn  { margin-top:6px; font-family:var(--mono); font-size:9px; padding:3px 6px;
+  border-radius:3px; background:var(--ebb); border:1px solid var(--bdb); color:var(--cb); }
 
-  /* ── HEADER ── */
-  header {
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    padding: 18px 32px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .logo {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--teal);
-    letter-spacing: .12em;
-    background: var(--teal-bg);
-    border: 1px solid var(--teal-border);
-    padding: 4px 10px;
-    border-radius: 4px;
-  }
-  header h1 {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text);
-  }
-  header p { font-size: 12px; color: var(--text3); font-family: var(--font-mono); }
-  .header-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
-  .badge {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 500;
-    padding: 3px 8px;
-    border-radius: 3px;
-    letter-spacing: .06em;
-  }
-  .badge.urgent { background: var(--coral-bg); border: 1px solid var(--coral-border); color: var(--coral); }
-  .badge.version { background: var(--gray-bg); border: 1px solid var(--gray-border); color: var(--text3); }
+/* node colour variants */
+.n.ev  { background:var(--ebe); border-color:var(--bde); width:160px; border-radius:50%;
+         height:160px; display:flex; flex-direction:column; align-items:center;
+         justify-content:center; }
+.n.ev  .ntag  { color:var(--ce); }
 
-  /* ── LAYOUT ── */
-  .container { max-width: 1280px; margin: 0 auto; padding: 32px 24px; }
+.n.sq  { background:var(--ebd); border-color:var(--bdd); }
+.n.sq  .ntag  { color:var(--cd); }
 
-  /* ── LEGEND ── */
-  .legend {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-bottom: 32px;
-    padding: 14px 18px;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-  }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-size: 11px;
-    color: var(--text2);
-    font-family: var(--font-mono);
-    padding: 4px 10px;
-    border-radius: 4px;
-    background: var(--bg3);
-  }
-  .legend-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+.n.sqb { background:var(--ebb); border-color:var(--bdb); }
+.n.sqb .ntag  { color:var(--cb); }
+.n.sqb .ntitle{ color:var(--cb); }
 
-  /* ── ENTRY NODE ── */
-  .entry-wrapper { display: flex; justify-content: center; margin-bottom: 0; }
-  .entry-node {
-    background: var(--bg3);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius);
-    padding: 14px 32px;
-    text-align: center;
-    font-weight: 500;
-    font-size: 14px;
-    position: relative;
-  }
-  .entry-node .sub { font-size: 11px; color: var(--text3); font-family: var(--font-mono); margin-top: 3px; }
+.n.sqx { background:var(--ebx); border-color:var(--bdx); }
+.n.sqx .ntag  { color:var(--cx); }
 
-  /* ── CONNECTOR ── */
-  .connector {
-    display: flex;
-    justify-content: center;
-    padding: 6px 0;
-  }
-  .connector-line {
-    width: 1px;
-    height: 24px;
-    background: var(--border2);
-    position: relative;
-  }
-  .connector-line::after {
-    content: '';
-    position: absolute;
-    bottom: -5px;
-    left: -3px;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    border-top: 6px solid var(--border2);
-  }
+.n.tri { background:var(--ebr); border-color:var(--bdr); }
+.n.tri .ntag  { color:var(--cr); }
 
-  /* ── BRANCHES ROW ── */
-  .branches-wrapper {
-    position: relative;
-    margin: 0;
-  }
-  .branch-labels {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 8px;
-    margin-bottom: 0;
-  }
-  .branch-tab {
-    text-align: center;
-    padding: 10px 8px 12px;
-    border-radius: 6px 6px 0 0;
-    cursor: pointer;
-    transition: all .2s;
-    border: 1px solid transparent;
-    border-bottom: none;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: .06em;
-    position: relative;
-    top: 1px;
-  }
-  .branch-tab .tab-letter { font-size: 18px; font-weight: 600; display: block; margin-bottom: 3px; }
-  .branch-tab .tab-name { display: block; font-weight: 400; }
-  .branch-tab.teal   { background: var(--teal-bg);   border-color: var(--teal-border);   color: var(--teal); }
-  .branch-tab.amber  { background: var(--amber-bg);  border-color: var(--amber-border);  color: var(--amber); }
-  .branch-tab.coral  { background: var(--coral-bg);  border-color: var(--coral-border);  color: var(--coral); }
-  .branch-tab.blue   { background: var(--blue-bg);   border-color: var(--blue-border);   color: var(--blue); }
-  .branch-tab.green  { background: var(--green-bg);  border-color: var(--green-border);  color: var(--green); }
-  .branch-tab.gray   { background: var(--gray-bg);   border-color: var(--gray-border);   color: var(--text2); }
-  .branch-tab:hover { filter: brightness(1.15); transform: translateY(-1px); }
-  .branch-tab.active { filter: brightness(1.2); z-index: 2; }
+.n.trib{ background:var(--ebb); border-color:var(--bdb); }
+.n.trib .ntag  { color:var(--cb); }
+.n.trib .ntitle{ color:var(--cb); }
 
-  /* ── BRANCH CONTENT ── */
-  .branches-content {
-    background: var(--bg2);
-    border: 1px solid var(--border2);
-    border-radius: 0 0 var(--radius) var(--radius);
-    padding: 0;
-    overflow: hidden;
-  }
-  .branch-panel {
-    display: none;
-    padding: 24px;
-  }
-  .branch-panel.active { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+/* ══════════════════════════════════════════
+   CONNECTORS
+══════════════════════════════════════════ */
 
-  /* ── NODE CARDS ── */
-  .node {
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    border: 1px solid;
-    position: relative;
-    cursor: default;
-    transition: transform .15s, box-shadow .15s;
-  }
-  .node:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,.4); }
-  .node .node-tag {
-    font-family: var(--font-mono);
-    font-size: 9px;
-    font-weight: 600;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    margin-bottom: 6px;
-    display: block;
-  }
-  .node .node-title { font-weight: 500; font-size: 13px; margin-bottom: 4px; }
-  .node .node-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
-  .node .node-warn {
-    margin-top: 8px;
-    font-size: 11px;
-    font-family: var(--font-mono);
-    padding: 5px 8px;
-    border-radius: 4px;
-    background: rgba(224,82,82,.12);
-    border: 1px solid var(--coral-border);
-    color: var(--coral);
-  }
-  .node.teal   { background: var(--teal-bg);   border-color: var(--teal-border); }
-  .node.amber  { background: var(--amber-bg);  border-color: var(--amber-border); }
-  .node.coral  { background: var(--coral-bg);  border-color: var(--coral-border); }
-  .node.purple { background: var(--purple-bg); border-color: var(--purple-border); }
-  .node.blue   { background: var(--blue-bg);   border-color: var(--blue-border); }
-  .node.green  { background: var(--green-bg);  border-color: var(--green-border); }
-  .node.gray   { background: var(--gray-bg);   border-color: var(--gray-border); }
-  .node.teal   .node-tag { color: var(--teal); }
-  .node.amber  .node-tag { color: var(--amber); }
-  .node.coral  .node-tag { color: var(--coral); }
-  .node.purple .node-tag { color: var(--purple); }
-  .node.blue   .node-tag { color: var(--blue); }
-  .node.green  .node-tag { color: var(--green); }
-  .node.gray   .node-tag { color: var(--text3); }
+/* vertical line + arrow down */
+.vc {
+  width:2px; height:var(--conn); background:var(--bd2);
+  margin:0 auto; position:relative; flex-shrink:0;
+}
+.vc.arr::after {
+  content:''; position:absolute; bottom:-5px; left:-4px;
+  border-left:5px solid transparent; border-right:5px solid transparent;
+  border-top:6px solid var(--bd2);
+}
+/* short vc */
+.vc.sm { height:16px; }
 
-  /* ── GUARDRAILS SECTION ── */
-  .section-title {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: .14em;
-    color: var(--text3);
-    text-transform: uppercase;
-    margin: 36px 0 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+/* branch label pill on vc */
+.vc-label {
+  font-family:var(--mono); font-size:9px; color:var(--t3); white-space:nowrap;
+  background:var(--bg3); border:1px solid var(--bd); border-radius:3px;
+  padding:1px 7px; display:block; text-align:center; margin:0 auto;
+  width:fit-content;
+}
 
-  .guardrails {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-  @media (max-width: 768px) {
-    .guardrails { grid-template-columns: 1fr 1fr; }
-    .branch-labels { grid-template-columns: repeat(3, 1fr); }
-    .branch-panel.active { grid-template-columns: 1fr; }
-  }
-  @media (max-width: 480px) {
-    .guardrails { grid-template-columns: 1fr; }
-    .branch-labels { grid-template-columns: repeat(2, 1fr); }
-  }
+/* horizontal split: T-connector
+   parent is flex row, children are .branch columns */
+.h-split {
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  gap:0;
+  position:relative;
+}
+/* horizontal line drawn with CSS between branches */
+.h-split::before {
+  content:'';
+  position:absolute;
+  top:0; /* aligns to top of h-split = where the connectors start */
+  left:50%; right:50%;
+  height:2px;
+  background:var(--bd2);
+  /* will be overridden per usage via inline style on .h-split */
+}
 
-  .guardrail-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    transition: border-color .2s;
-  }
-  .guardrail-card:hover { border-color: var(--border2); }
-  .guardrail-id {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text3);
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    padding: 2px 7px;
-    border-radius: 3px;
-    white-space: nowrap;
-    margin-top: 1px;
-  }
-  .guardrail-body .g-title { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
-  .guardrail-body .g-desc  { font-size: 11px; color: var(--text2); line-height: 1.5; }
+/* branch column inside h-split */
+.bc {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  flex-shrink:0;
+}
 
-  /* ── SOURCE OF TRUTH ── */
-  .sot-bar {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px 20px;
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    flex-wrap: wrap;
-    margin-bottom: 10px;
-  }
-  .sot-label { font-family: var(--font-mono); font-size: 10px; color: var(--text3); font-weight: 600; letter-spacing: .1em; margin-right: 6px; }
-  .sot-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    padding: 4px 10px;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--text2);
-    font-family: var(--font-mono);
-  }
-  .sot-item .pri { font-weight: 600; color: var(--teal); }
-  .sot-arrow { color: var(--text3); font-size: 12px; }
-  .sot-warn {
-    font-size: 11px;
-    color: var(--amber);
-    font-family: var(--font-mono);
-    margin-top: 10px;
-    padding: 8px 12px;
-    background: var(--amber-bg);
-    border: 1px solid var(--amber-border);
-    border-radius: 4px;
-  }
+/* The horizontal T-bar above a h-split.
+   We draw it with a dedicated element for clarity. */
+.t-bar {
+  display:flex; align-items:center; width:100%;
+}
+.t-bar .tl { flex:1; height:2px; background:var(--bd2); }
+.t-bar .tc { width:2px; height:16px; background:var(--bd2); flex-shrink:0; }
+.t-bar .blank { flex:1; }
 
-  /* ── SPECIAL CASES ── */
-  .special-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  @media (max-width: 600px) { .special-grid { grid-template-columns: 1fr; } }
+/* two-branch T: center line drops down, left & right lines go outward */
+.split2 { display:flex; align-items:flex-start; gap:0; }
+.split2 .bc { flex:1; }
 
-  .special-card {
-    border-radius: var(--radius);
-    padding: 16px 18px;
-    border: 1px solid;
-  }
-  .special-card.coral { background: var(--coral-bg); border-color: var(--coral-border); }
-  .special-card.amber { background: var(--amber-bg); border-color: var(--amber-border); }
-  .special-card .sc-tag { font-family: var(--font-mono); font-size: 9px; font-weight: 600; letter-spacing: .1em; margin-bottom: 6px; display: block; }
-  .special-card.coral .sc-tag { color: var(--coral); }
-  .special-card.amber .sc-tag { color: var(--amber); }
-  .special-card .sc-title { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
-  .special-card ul { padding-left: 14px; font-size: 12px; color: var(--text2); line-height: 1.7; }
+/* ══════════════════════════════════════════
+   PHASE WRAPPER
+══════════════════════════════════════════ */
+.phase {
+  display:flex; flex-direction:column; align-items:center;
+  margin-bottom:8px; width:100%;
+}
 
-  footer {
-    text-align: center;
-    padding: 24px;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--text3);
-    border-top: 1px solid var(--border);
-    margin-top: 40px;
-  }
+/* phase bar */
+.pbar { display:flex; align-items:center; gap:10px; width:100%; margin:20px 0 18px; }
+.pbar .pl { flex:1; height:1px; background:var(--bd); }
+.pbar .pt { font-family:var(--mono); font-size:9px; font-weight:600; letter-spacing:.16em;
+  color:var(--t3); text-transform:uppercase; white-space:nowrap;
+  padding:3px 12px; background:var(--bg3); border:1px solid var(--bd); border-radius:3px; }
+
+/* situations wrapper — horizontal strip */
+.sit-strip {
+  display:flex; align-items:flex-start; justify-content:center;
+  gap:0; width:100%; flex-wrap:wrap;
+  padding:22px 16px 26px;
+  background:var(--bg2); border:1px solid var(--bd2); border-radius:10px;
+  margin-top:6px;
+}
+
+/* situation label above each group */
+.sit-label {
+  font-family:var(--mono); font-size:9px; font-weight:600; letter-spacing:.1em;
+  color:var(--t3); text-transform:uppercase; white-space:nowrap;
+  padding:2px 8px; background:var(--bg3); border:1px solid var(--bd);
+  border-radius:3px; margin-bottom:10px; text-align:center;
+}
+
+/* single situation column */
+.sit {
+  display:flex; flex-direction:column; align-items:center;
+  padding:0 20px; flex:1; min-width:220px; max-width:320px;
+}
+
+/* divider between sit columns */
+.sit-div {
+  width:1px; background:var(--bd); align-self:stretch; flex-shrink:0; margin:0 4px;
+}
+
+/* ══════════════════════════════════════════
+   TWO-BRANCH HORIZONTAL SPLIT (YES / NO)
+   Layout: two .bc columns, connected at top
+   with a horizontal bar + vertical drops.
+══════════════════════════════════════════ */
+
+/* Container that holds the T-bar + two branches */
+.yn-wrap {
+  display:flex; flex-direction:column; align-items:center; width:100%;
+}
+
+/* The top T: a horizontal line connecting left-drop and right-drop */
+.yn-bar {
+  display:flex; align-items:stretch; width:100%; position:relative;
+}
+.yn-bar .yn-left-vert  { width:2px; background:var(--bd2); flex-shrink:0; }
+.yn-bar .yn-hline      { flex:1; height:2px; background:var(--bd2); margin-top:14px; } /* 14px = half the label pill height */
+.yn-bar .yn-right-vert { width:2px; background:var(--bd2); flex-shrink:0; }
+
+/* the two branch columns */
+.yn-cols { display:flex; align-items:flex-start; width:100%; }
+.yn-col  { display:flex; flex-direction:column; align-items:center; flex:1; padding:0 8px; }
+
+/* ══════════════════════════════════════════
+   FOOTER SECTIONS
+══════════════════════════════════════════ */
+.sec-head { font-family:var(--mono); font-size:9px; font-weight:600; letter-spacing:.16em;
+  color:var(--t3); text-transform:uppercase; margin:36px 0 14px;
+  display:flex; align-items:center; gap:10px; }
+.sec-head::after { content:''; flex:1; height:1px; background:var(--bd); }
+
+.g-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.g-card { background:var(--bg2); border:1px solid var(--bd); border-radius:8px;
+  padding:11px 13px; display:flex; gap:9px; }
+.g-id { font-family:var(--mono); font-size:11px; font-weight:600; color:var(--t3);
+  background:var(--bg3); border:1px solid var(--bd); padding:2px 6px;
+  border-radius:3px; white-space:nowrap; margin-top:1px; }
+.g-title { font-size:12px; font-weight:500; margin-bottom:2px; }
+.g-desc  { font-size:11px; color:var(--t2); line-height:1.5; }
+
+.sot-bar { background:var(--bg2); border:1px solid var(--bd); border-radius:8px;
+  padding:12px 16px; display:flex; gap:5px; align-items:center; flex-wrap:wrap; margin-bottom:7px; }
+.sot-lbl { font-family:var(--mono); font-size:9px; color:var(--t3); font-weight:600;
+  letter-spacing:.1em; margin-right:4px; }
+.sot-i { font-size:11px; padding:3px 8px; background:var(--bg3); border:1px solid var(--bd);
+  border-radius:4px; color:var(--t2); font-family:var(--mono); }
+.sot-i .n2 { font-weight:600; color:var(--cr); }
+.sot-sep { color:var(--t3); }
+.sot-note { font-size:11px; color:var(--cd); font-family:var(--mono); margin-top:7px;
+  padding:7px 10px; background:var(--ebd); border:1px solid var(--bdd); border-radius:4px; }
+
+.sc-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px; }
+.sc-card { border-radius:8px; padding:13px 15px; border:1px solid; }
+.sc-card.coral { background:var(--ebb); border-color:var(--bdb); }
+.sc-card.amber { background:var(--ebd); border-color:var(--bdd); }
+.sc-tag { font-family:var(--mono); font-size:9px; font-weight:600;
+  letter-spacing:.09em; display:block; margin-bottom:4px; }
+.sc-card.coral .sc-tag { color:var(--cb); }
+.sc-card.amber .sc-tag { color:var(--cd); }
+.sc-title { font-size:12px; font-weight:500; margin-bottom:5px; }
+.sc-card ul { padding-left:13px; font-size:11px; color:var(--t2); line-height:1.7; }
+
+footer { text-align:center; padding:18px; font-family:var(--mono); font-size:10px;
+  color:var(--t3); border-top:1px solid var(--bd); margin-top:24px; }
+
+@media(max-width:900px){ .g-grid{grid-template-columns:1fr 1fr;} }
+@media(max-width:600px){ .g-grid{grid-template-columns:1fr;} .sc-grid{grid-template-columns:1fr;} }
 </style>
 </head>
 <body>
@@ -388,381 +302,772 @@
 <header>
   <div class="logo">PATI GROUP</div>
   <div>
-    <h1>CS & Fulfillment — Decision Tree</h1>
-    <p>Customer Service · Dispute · Fulfillment · Guardrails</p>
+    <h1>CS & Fulfillment — Customer Journey Decision Tree v3</h1>
+    <p>Hành trình khách hàng · Dọc = flow · Ngang = tình huống song song / YES-NO</p>
   </div>
-  <div class="header-right">
-    <span class="badge urgent">⚠ URGENT = Raise Phong trước</span>
-    <span class="badge version">v1.0 · 2025</span>
-  </div>
+  <div class="hbadge">⚠ URGENT = Raise Phong trước</div>
 </header>
 
-<div class="container">
+<div class="page">
 
-  <!-- LEGEND -->
-  <div class="legend">
-    <span class="legend-item"><span class="legend-dot" style="background:var(--teal)"></span>Hành động thực thi</span>
-    <span class="legend-item"><span class="legend-dot" style="background:var(--amber)"></span>Điều kiện / Check</span>
-    <span class="legend-item"><span class="legend-dot" style="background:var(--coral)"></span>Chặn / Cảnh báo</span>
-    <span class="legend-item"><span class="legend-dot" style="background:var(--purple)"></span>Escalate Phong</span>
-    <span class="legend-item"><span class="legend-dot" style="background:var(--blue)"></span>Hệ thống / Tool</span>
-    <span class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>Xử lý giao hàng</span>
-    <span class="legend-item"><span class="legend-dot" style="background:var(--text3)"></span>Kết thúc / Neutral</span>
+<div class="legend">
+  <div class="leg"><svg width="13" height="13"><circle cx="6.5" cy="6.5" r="5.5" fill="none" stroke="#4fa3e8" stroke-width="1.5"/></svg>○ Sự kiện</div>
+  <div class="leg"><svg width="13" height="13"><rect x="1" y="1" width="11" height="11" fill="none" stroke="#f0a040" stroke-width="1.5"/></svg>□ Quyết định</div>
+  <div class="leg"><svg width="13" height="13"><polygon points="6.5,1 12,12 1,12" fill="none" stroke="#1ecfaa" stroke-width="1.5"/></svg>△ Kết quả</div>
+  <div class="leg"><svg width="13" height="13"><rect x="1" y="1" width="11" height="11" fill="none" stroke="#e05252" stroke-width="1.5"/></svg>□ Chặn</div>
+  <div class="leg"><svg width="13" height="13"><rect x="1" y="1" width="11" height="11" fill="none" stroke="#9b7ff4" stroke-width="1.5"/></svg>□ Escalate Phong</div>
+  <div class="leg" style="margin-left:auto;color:var(--t3)">↓ flow dọc &nbsp;·&nbsp; ← YES / NO → tách ngang &nbsp;·&nbsp; tình huống song song = ngang</div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PHASE 1 — ĐẶT HÀNG
+════════════════════════════════════════ -->
+<div class="phase">
+  <div class="pbar"><div class="pl"></div><div class="pt">Giai đoạn 1 — Khách đặt hàng</div><div class="pl"></div></div>
+
+  <!-- Spine event node -->
+  <div class="n ev">
+    <span class="ntag">SỰ KIỆN</span>
+    <div class="ntitle">Khách đặt hàng</div>
+    <div class="nbody">Shopify / Recharge</div>
   </div>
 
-  <!-- ENTRY -->
-  <div class="entry-wrapper">
-    <div class="entry-node">
-      <div>📨 Email / Sự kiện từ khách hàng</div>
-      <div class="sub">Bước 0 — Phân loại intent (MECE, 6 nhánh loại trừ nhau)</div>
-    </div>
-  </div>
-  <div class="connector"><div class="connector-line"></div></div>
+  <div class="vc arr"></div>
+  <div class="vc-label">Các tình huống có thể xảy ra</div>
+  <div class="vc sm"></div>
 
-  <!-- BRANCH TABS -->
-  <div class="branches-wrapper">
-    <div class="branch-labels">
-      <div class="branch-tab teal active" onclick="showBranch('A',this)">
-        <span class="tab-letter">A</span>
-        <span class="tab-name">Cancel / Pause / Skip</span>
-      </div>
-      <div class="branch-tab amber" onclick="showBranch('B',this)">
-        <span class="tab-letter">B</span>
-        <span class="tab-name">Refund</span>
-      </div>
-      <div class="branch-tab coral" onclick="showBranch('C',this)">
-        <span class="tab-letter">C</span>
-        <span class="tab-name">Dispute / Chargeback</span>
-      </div>
-      <div class="branch-tab blue" onclick="showBranch('D',this)">
-        <span class="tab-letter">D</span>
-        <span class="tab-name">Fulfillment</span>
-      </div>
-      <div class="branch-tab green" onclick="showBranch('E',this)">
-        <span class="tab-letter">E</span>
-        <span class="tab-name">Giao hàng / WISMO</span>
-      </div>
-      <div class="branch-tab gray" onclick="showBranch('F',this)">
-        <span class="tab-letter">F</span>
-        <span class="tab-name">Spam / Khác</span>
-      </div>
-    </div>
+  <div class="sit-strip">
 
-    <div class="branches-content">
-
-      <!-- BRANCH A -->
-      <div class="branch-panel active" id="panel-A">
-        <div class="node teal">
-          <span class="node-tag">Bước 1</span>
-          <div class="node-title">Detect intent đa ngôn ngữ</div>
-          <div class="node-desc">EN / FR / DE / ES / IT<br>KHÔNG match: opt-out, hỏi-cách-huỷ đơn thuần</div>
+    <!-- TH1: Huỷ 12h -->
+    <div class="sit">
+      <div class="sit-label">Tình huống 1 — Huỷ trong 12h</div>
+      <div class="shape-ind"><div class="ind-sq"></div></div>
+      <div class="n sq">
+        <span class="ntag">QUYẾT ĐỊNH</span>
+        <div class="ntitle">Khách yêu cầu huỷ trong 12h?</div>
+        <div class="nbody">Đặt hàng chưa quá 12h + chưa ship</div>
+      </div>
+      <!-- YES left / NO right -->
+      <div style="width:100%;">
+        <!-- top T connector -->
+        <div style="display:flex;align-items:flex-end;height:28px;position:relative;">
+          <div style="flex:1;height:2px;background:var(--bd2);margin-bottom:0;align-self:flex-end;"></div>
+          <div style="width:2px;height:28px;background:var(--bd2);flex-shrink:0;"></div>
+          <div style="flex:1;height:2px;background:var(--bd2);align-self:flex-end;"></div>
         </div>
-        <div class="node amber">
-          <span class="node-tag">Bước 2 — CHECK ĐẦU TIÊN</span>
-          <div class="node-title">Kiểm tra 120 ngày (cam kết 4 tháng)</div>
-          <div class="node-desc">
-            <strong>&lt; 120 ngày</strong> → POLICY DECLINE (không huỷ nếu không có Bao/Phong duyệt)<br>
-            → offer pause/skip/reschedule + báo ngày đủ điều kiện<br><br>
-            <strong>≥ 120 ngày</strong> → Đủ điều kiện, sang bước 3
+        <div style="display:flex;align-items:flex-start;">
+          <!-- YES branch -->
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:0 6px;">
+            <div class="vc-label">CÓ</div>
+            <div class="vc arr"></div>
+            <div class="shape-ind"><div class="ind-sq-x"></div></div>
+            <div class="n sqx">
+              <span class="ntag">ESCALATE</span>
+              <div class="ntitle">Raise Phong</div>
+            </div>
+            <div class="vc arr"></div>
+            <div class="shape-ind"><div class="ind-tri"></div></div>
+            <div class="n tri">
+              <span class="ntag">KẾT QUẢ</span>
+              <div class="ntitle">Refund 100% giá SP</div>
+              <div class="nbody">Phong duyệt. Không gồm ship/thuế. Không cần trả hàng.</div>
+            </div>
           </div>
-          <div class="node-warn">⛔ Không huỷ nếu chưa đủ 120 ngày (trừ khi Phong/Bao duyệt)</div>
-        </div>
-        <div class="node amber">
-          <span class="node-tag">Bước 3 — Charge Window</span>
-          <div class="node-title">next_charge ≤ 7 ngày?</div>
-          <div class="node-desc">
-            <strong>≤ 7 ngày</strong> → Skip/Pause TRƯỚC, KHÔNG cancel ngay<br>
-            <strong>Charge đã queued</strong> → Skip charge rồi mới pause<br>
-            <strong>&gt; 7 ngày</strong> → Vào Retention Ladder
-          </div>
-          <div class="node-warn">⚠ pause = SKIP queued charge. PUT next_charge = silent-fail — CẤM</div>
-        </div>
-        <div class="node teal">
-          <span class="node-tag">Bước 4 — Retention Ladder</span>
-          <div class="node-title">4 tầng xử lý (money out = cuối)</div>
-          <div class="node-desc">
-            <strong>T1</strong> DELAY — $0: pause 30/60/90, skip, reschedule, đổi tần suất → offer ĐẦU TIÊN<br>
-            <strong>T2</strong> DOWNSALE<br>
-            <strong>T3</strong> CREDITS<br>
-            <strong>T4</strong> CANCEL/REFUND — chỉ sau T1-3 bị từ chối, hoặc: defective / allergic / legal / 90-day MBG<br><br>
-            <em>Mood mapping: frustrated → T1+T3 · angry → T3/T4 · abusive → escalate</em>
-          </div>
-        </div>
-        <div class="node amber">
-          <span class="node-tag">Bước 5 — OTP</span>
-          <div class="node-title">Xác thực OTP</div>
-          <div class="node-desc">T1 → không cần OTP<br>T2, T3, T4 → cần OTP 6 số (hiệu lực 24h)</div>
-        </div>
-        <div class="node teal">
-          <span class="node-tag">Bước 6 — Execute</span>
-          <div class="node-title">Thực thi → Verify → Log</div>
-          <div class="node-desc">
-            Execute Recharge → Re-fetch xác nhận (verify) → Gửi mail xác nhận → Log<br><br>
-            <em>Refund trong T4 → vẫn theo Nhánh B (Phong quyết)</em>
+          <!-- NO branch -->
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:0 6px;">
+            <div class="vc-label">KHÔNG</div>
+            <div class="vc arr"></div>
+            <div class="shape-ind"><div class="ind-tri-b"></div></div>
+            <div class="n trib">
+              <span class="ntag">KẾT QUẢ</span>
+              <div class="ntitle">Không huỷ được</div>
+              <div class="nbody">Tiếp tục xử lý đơn</div>
+            </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- BRANCH B -->
-      <div class="branch-panel" id="panel-B">
-        <div class="node purple">
-          <span class="node-tag">Nguyên tắc tối thượng</span>
-          <div class="node-title">⛔ Agent KHÔNG tự quyết refund</div>
-          <div class="node-desc">Mọi case refund → raise Phong kèm đánh giá trước khi phản hồi khách<br><br>Source of Truth = Policy Phong, KHÔNG theo skill cũ</div>
-        </div>
-        <div class="node teal">
-          <span class="node-tag">Case 1 — Được phép refund</span>
-          <div class="node-title">90-day Money Back Guarantee</div>
-          <div class="node-desc">
-            Đủ CẢ 4 điều kiện:<br>
-            ① Đơn ĐẦU của sản phẩm<br>
-            ② Tối đa 3 units<br>
-            ③ Trong 90 ngày từ ngày NHẬN hàng<br>
-            ④ Đã dùng ≥ 2 tuần<br><br>
-            → Hoàn 100% GIÁ SẢN PHẨM (KHÔNG bao gồm ship/thuế/hải quan, không cần trả hàng)
-          </div>
-        </div>
-        <div class="node teal">
-          <span class="node-tag">Case 2 — Được phép refund</span>
-          <div class="node-title">Huỷ trong 12h từ lúc đặt</div>
-          <div class="node-desc">Điều kiện: đơn đặt chưa quá 12h VÀ chưa ship</div>
-        </div>
-        <div class="node coral">
-          <span class="node-tag">KHÔNG refund — Các trường hợp</span>
-          <div class="node-title">Danh sách từ chối refund</div>
-          <div class="node-desc">
-            ✗ Sub renewal đã qua 12h & đã ship<br>
-            ✗ Khiếu nại mùi/vị/màu (ngoài MBG lần đầu)<br>
-            ✗ Dùng sai / bảo quản sai<br>
-            ✗ Mua bằng điểm / discount lớn<br>
-            ✗ Gian lận (nhiều account, mua sỉ)<br>
-            ✗ <strong>Hỏng / Sai / Thất lạc → CHỈ gửi THAY THẾ</strong>
-          </div>
-        </div>
-        <div class="node amber">
-          <span class="node-tag">Xử lý khi không fit</span>
-          <div class="node-title">Decline + Offer thay thế + Raise Phong</div>
-          <div class="node-desc">Decline lịch sự → offer replacement → vẫn raise Phong để loop xử lý</div>
-        </div>
+    <div class="sit-div"></div>
+
+    <!-- TH2: Partially paid -->
+    <div class="sit">
+      <div class="sit-label">Tình huống 2 — Partially paid</div>
+      <div class="shape-ind"><div class="ind-sq"></div></div>
+      <div class="n sq">
+        <span class="ntag">QUYẾT ĐỊNH</span>
+        <div class="ntitle">Đơn partially_paid?</div>
+        <div class="nbody">Thanh toán chưa đủ</div>
       </div>
-
-      <!-- BRANCH C -->
-      <div class="branch-panel" id="panel-C">
-        <div class="node purple">
-          <span class="node-tag">Bước 1 — URGENT</span>
-          <div class="node-title">Raise Phong ngay</div>
-          <div class="node-desc">KHÔNG để "no merchant action" → che mất hạn nộp evidence</div>
+      <div style="width:100%;">
+        <div style="display:flex;align-items:flex-end;height:28px;">
+          <div style="flex:1;height:2px;background:var(--bd2);align-self:flex-end;"></div>
+          <div style="width:2px;height:28px;background:var(--bd2);flex-shrink:0;"></div>
+          <div style="flex:1;height:2px;background:var(--bd2);align-self:flex-end;"></div>
         </div>
-        <div class="node blue">
-          <span class="node-tag">Bước 2 — ChargeFlow tự fight</span>
-          <div class="node-title">Đơn tag "Chargeflow: Proceed"</div>
-          <div class="node-desc">ChargeFlow SaaS tự xử lý server-side<br>Chrome CDP 9222 (logged app.chargeflow.io) = GIÁM SÁT + thêm evidence<br><em>cf_triage phân loại → chargeflow_dispute_monitor.py --submit</em></div>
-        </div>
-        <div class="node blue">
-          <span class="node-tag">Bước 3 — Infra bắt buộc</span>
-          <div class="node-title">Hạ tầng kỹ thuật</div>
-          <div class="node-desc">Chrome port 9222 phải sống (KHÔNG dùng 9223)<br>Session ChargeFlow phải login<br>Verify trước khi submit evidence</div>
-        </div>
-        <div class="node amber">
-          <span class="node-tag">Bước 4 — Check nguồn gốc</span>
-          <div class="node-title">Dispute từ Apr29 migration?</div>
-          <div class="node-desc">Nhận diện: SKU charge đầu ≠ sub hiện tại + updated 29/04</div>
-        </div>
-        <div class="node coral">
-          <span class="node-tag">Apr29 → xử lý đặc biệt</span>
-          <div class="node-title">KHÔNG fight — Concede</div>
-          <div class="node-desc">Lỗi internal của team → KHÔNG fight dispute<br>Phong/Kevin quyết: refund / concede<br>Chargeback nhóm này đang nổ → ưu tiên xử lý nhanh</div>
-        </div>
-      </div>
-
-      <!-- BRANCH D -->
-      <div class="branch-panel" id="panel-D">
-        <div class="node purple">
-          <span class="node-tag">Bước 1 — URGENT</span>
-          <div class="node-title">Raise Phong trước khi xử lý</div>
-          <div class="node-desc">Verify tracking thật, không ghost action</div>
-        </div>
-        <div class="node amber">
-          <span class="node-tag">Bước 2 — Best 3PL</span>
-          <div class="node-title">Best 3PL không ship được?</div>
-          <div class="node-desc">
-            <strong>Vùng không ship được / OOS / kẹt</strong> → Vào Lark "Best cannot ship" → Tạo Flexport order<br><br>
-            <strong>SKU OOS ở Flexport</strong> (vd WNSJRS2023) → Substitute Gold Grade WNPSGS2024 (cần Phong duyệt)<br><br>
-            <strong>Địa chỉ microstate</strong> (SM/MQ/LI): autocomplete + fill State → vẫn route được
+        <div style="display:flex;align-items:flex-start;">
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:0 6px;">
+            <div class="vc-label">CÓ</div>
+            <div class="vc arr"></div>
+            <div class="shape-ind"><div class="ind-sq-b"></div></div>
+            <div class="n sqb">
+              <span class="ntag">CHẶN</span>
+              <div class="ntitle">Chỉ ship phần đã trả</div>
+              <div class="nbody">Phần chưa trả → giữ lại. Raise Phong xử lý phần còn lại.</div>
+            </div>
           </div>
-        </div>
-        <div class="node coral">
-          <span class="node-tag">Bước 3 — Partially paid</span>
-          <div class="node-title">Đơn partially_paid</div>
-          <div class="node-desc">CHỈ ship phần đã trả<br>Phần chưa trả → giữ lại / không ship<br>Raise Phong để xử lý phần còn lại</div>
-        </div>
-        <div class="node amber">
-          <span class="node-tag">Bước 4 — Địa chỉ sai</span>
-          <div class="node-title">Sai địa chỉ → Address verification protocol</div>
-          <div class="node-desc">Verify địa chỉ với khách trước khi ship<br>Cập nhật Recharge → Re-fetch xác nhận</div>
-        </div>
-        <div class="node teal">
-          <span class="node-tag">Bước 5 — Kẹt vận chuyển</span>
-          <div class="node-title">Reship (BestFulfill) + Update tracking</div>
-          <div class="node-desc">Không để kẹt vận chuyển lâu mà không xử lý<br>Cập nhật tracking cho khách sau reship</div>
-        </div>
-      </div>
-
-      <!-- BRANCH E -->
-      <div class="branch-panel" id="panel-E">
-        <div class="node amber">
-          <span class="node-tag">Phân loại</span>
-          <div class="node-title">WISMO / Thất lạc / Giao thất bại / Hỏng-sai-mất</div>
-          <div class="node-desc">Xác định đúng vấn đề trước khi xử lý</div>
-        </div>
-        <div class="node green">
-          <span class="node-tag">Xử lý WISMO</span>
-          <div class="node-title">Where Is My Order → Tra 17track</div>
-          <div class="node-desc">Tra tracking 17track → Cập nhật trạng thái cho khách<br>Nếu stuck &gt; ngưỡng → reship</div>
-        </div>
-        <div class="node coral">
-          <span class="node-tag">Thất lạc / Giao thất bại</span>
-          <div class="node-title">RESHIP — KHÔNG refund</div>
-          <div class="node-desc">Policy: gửi replacement, không hoàn tiền trong mọi trường hợp thất lạc/giao thất bại</div>
-        </div>
-        <div class="node coral">
-          <span class="node-tag">Hỏng / Sai sản phẩm</span>
-          <div class="node-title">THAY THẾ — KHÔNG refund</div>
-          <div class="node-desc">Gửi sản phẩm thay thế, không hoàn tiền<br>Raise Phong nếu case phức tạp</div>
-        </div>
-        <div class="node purple">
-          <span class="node-tag">Loop giận / Đe doạ</span>
-          <div class="node-title">Loop de-escalation</div>
-          <div class="node-desc">
-            ① Cắt loop sớm — không để escalate thêm<br>
-            ② Đưa người thật vào (không để bot xử lý tiếp)<br>
-            ③ Giải quyết cụ thể, không hứa hẹn chung chung<br>
-            ④ KHÔNG để leo thang → scam review / legal
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:0 6px;">
+            <div class="vc-label">KHÔNG</div>
+            <div class="vc arr"></div>
+            <div class="shape-ind"><div class="ind-tri"></div></div>
+            <div class="n tri">
+              <span class="ntag">KẾT QUẢ</span>
+              <div class="ntitle">Xử lý đơn bình thường</div>
+            </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- BRANCH F -->
-      <div class="branch-panel" id="panel-F">
-        <div class="node gray">
-          <span class="node-tag">Spam / Bot</span>
-          <div class="node-title">Spam filter tự động</div>
-          <div class="node-desc">Word-boundary detection<br>Bot blocklist<br>Không cần xử lý thủ công</div>
-        </div>
-        <div class="node gray">
-          <span class="node-tag">Hỏi giá sỉ / B2B</span>
-          <div class="node-title">Không phải CS gấp</div>
-          <div class="node-desc">Route sang channel phù hợp<br>Không cần ưu tiên trong hàng đợi CS</div>
-        </div>
-        <div class="node gray">
-          <span class="node-tag">Khác</span>
-          <div class="node-title">Reply chung / Phân loại lại</div>
-          <div class="node-desc">Nếu sau khi reply thấy fit nhánh A-E → reclassify và xử lý theo đúng nhánh</div>
-        </div>
-      </div>
+    <div class="sit-div"></div>
 
-    </div><!-- /branches-content -->
-  </div><!-- /branches-wrapper -->
+    <!-- TH3: Địa chỉ sai -->
+    <div class="sit">
+      <div class="sit-label">Tình huống 3 — Địa chỉ sai</div>
+      <div class="shape-ind"><div class="ind-sq"></div></div>
+      <div class="n sq">
+        <span class="ntag">QUYẾT ĐỊNH</span>
+        <div class="ntitle">Địa chỉ sai / không hợp lệ?</div>
+        <div class="nbody">Microstate: SM / MQ / LI</div>
+      </div>
+      <div style="width:100%;">
+        <div style="display:flex;align-items:flex-end;height:28px;">
+          <div style="flex:1;height:2px;background:var(--bd2);align-self:flex-end;"></div>
+          <div style="width:2px;height:28px;background:var(--bd2);flex-shrink:0;"></div>
+          <div style="flex:1;height:2px;background:var(--bd2);align-self:flex-end;"></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;">
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:0 6px;">
+            <div class="vc-label">CÓ</div>
+            <div class="vc arr"></div>
+            <div class="shape-ind"><div class="ind-sq-x"></div></div>
+            <div class="n sqx">
+              <span class="ntag">ESCALATE</span>
+              <div class="ntitle">Address verification</div>
+              <div class="nbody">Verify với khách → Cập nhật Recharge → Re-fetch xác nhận</div>
+            </div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:0 6px;">
+            <div class="vc-label">KHÔNG</div>
+            <div class="vc arr"></div>
+            <div class="shape-ind"><div class="ind-tri"></div></div>
+            <div class="n tri">
+              <span class="ntag">KẾT QUẢ</span>
+              <div class="ntitle">Xử lý đơn bình thường</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-  <!-- ── GUARDRAILS ── -->
-  <div class="section-title">Guardrails — Áp dụng TRƯỚC mọi hành động</div>
-  <div class="guardrails">
-    <div class="guardrail-card">
-      <div class="guardrail-id">G1</div>
-      <div class="guardrail-body">
-        <div class="g-title">Urgent escalate</div>
-        <div class="g-desc">refund / dispute / fulfill = URGENT → raise Phong TRƯỚC khi xử với khách; không tự xử / cam kết</div>
-      </div>
-    </div>
-    <div class="guardrail-card">
-      <div class="guardrail-id">G2</div>
-      <div class="guardrail-body">
-        <div class="g-title">Không tự quyết refund</div>
-        <div class="g-desc">Mọi case refund → Phong quyết. Không có ngoại lệ.</div>
-      </div>
-    </div>
-    <div class="guardrail-card">
-      <div class="guardrail-id">G3</div>
-      <div class="guardrail-body">
-        <div class="g-title">Cancel = giải pháp CUỐI</div>
-        <div class="g-desc">Check policy trước, không phản xạ huỷ. Phải qua T1→T3 trước khi đến T4.</div>
-      </div>
-    </div>
-    <div class="guardrail-card">
-      <div class="guardrail-id">G4</div>
-      <div class="guardrail-body">
-        <div class="g-title">Verify mọi write</div>
-        <div class="g-desc">Mọi thao tác ghi Recharge/Shopify → re-fetch xác nhận. Không "ghost action".</div>
-      </div>
-    </div>
-    <div class="guardrail-card">
-      <div class="guardrail-id">G5</div>
-      <div class="guardrail-body">
-        <div class="g-title">Không bulk edit không có 4-eye</div>
-        <div class="g-desc">Recharge bulk edit → bắt buộc 4-eye review. Bài học từ Apr29.</div>
-      </div>
-    </div>
-    <div class="guardrail-card">
-      <div class="guardrail-id">G6</div>
-      <div class="guardrail-body">
-        <div class="g-title">Ops / Infra macmini</div>
-        <div class="g-desc">Stealth cho việc của Phong. Backup (bao-debug-) trước khi sửa. macOS = launchd.</div>
-      </div>
-    </div>
+  </div><!-- /sit-strip -->
+</div><!-- /phase 1 -->
+
+<!-- spine connector between phases -->
+<div class="vc arr" style="height:36px;"></div>
+
+<!-- ════════════════════════════════════════
+     PHASE 2 — XỬ LÝ & FULFILLMENT
+════════════════════════════════════════ -->
+<div class="phase">
+  <div class="pbar"><div class="pl"></div><div class="pt">Giai đoạn 2 — Xử lý & Fulfillment</div><div class="pl"></div></div>
+
+  <div class="n ev">
+    <span class="ntag">SỰ KIỆN</span>
+    <div class="ntitle">Đơn vào hàng đợi fulfill</div>
+    <div class="nbody">Best 3PL nhận đơn</div>
   </div>
 
-  <!-- ── SOURCE OF TRUTH ── -->
-  <div class="section-title">Source of Truth — Thứ tự ưu tiên</div>
-  <div class="sot-bar">
-    <span class="sot-label">ƯU TIÊN</span>
-    <div class="sot-item"><span class="pri">①</span>Policy Kevin / Phong ban hành</div>
-    <span class="sot-arrow">›</span>
-    <div class="sot-item"><span class="pri">②</span>Skill macmini</div>
-    <span class="sot-arrow">›</span>
-    <div class="sot-item"><span class="pri">③</span>Memory / Observation</div>
-    <span class="sot-arrow">›</span>
-    <div class="sot-item"><span class="pri">④</span>Live system (Recharge / Shopify / ChargeFlow)</div>
-  </div>
-  <div class="sot-warn">⚠ Khi nguồn mâu thuẫn → Policy ban hành THẮNG. Verify-first trước mọi khẳng định. Khi yêu cầu lệch policy → KHÔNG làm ngay, confirm lại.</div>
+  <div class="vc arr"></div>
+  <div class="vc-label">Các tình huống có thể xảy ra</div>
+  <div class="vc sm"></div>
 
-  <!-- ── SPECIAL CASES ── -->
-  <div class="section-title">Case đặc biệt</div>
-  <div class="special-grid">
-    <div class="special-card coral">
-      <span class="sc-tag">⚠ APR29 MIGRATION VICTIMS</span>
-      <div class="sc-title">756 sub migrate sang ShilaSource sai</div>
-      <ul>
-        <li>Nhận diện: SKU charge đầu ≠ sub hiện tại + updated 29/04</li>
-        <li>Remedy: Phong/Kevin quyết (replacement / exception)</li>
-        <li>KHÔNG refund mặc định</li>
-        <li>Chargeback nhóm này đang nổ → ưu tiên</li>
-        <li>Dispute từ Apr29 → KHÔNG fight, concede</li>
-      </ul>
+  <div class="sit-strip">
+
+    <!-- TH1: Best không ship -->
+    <div class="sit">
+      <div class="sit-label">Tình huống 1 — Best không ship được</div>
+      <div class="shape-ind"><div class="ind-sq"></div></div>
+      <div class="n sq">
+        <span class="ntag">QUYẾT ĐỊNH</span>
+        <div class="ntitle">Best 3PL không ship được?</div>
+        <div class="nbody">Vùng / OOS / kẹt</div>
+      </div>
+      <div style="width:100%;">
+        <div style="display:flex;align-items:flex-end;height:28px;">
+          <div style="flex:1;height:2px;background:var(--bd2);align-self:flex-end;"></div>
+          <div style="width:2px;height:28px;background:var(--bd2);flex-shrink:0;"></div>
+          <div style="flex:1;height:2px;background:var(--bd2);align-self:flex-end;"></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;">
+          <!-- CÓ → Flexport flow -->
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:0 6px;">
+            <div class="vc-label">CÓ</div>
+            <div class="vc arr"></div>
+            <div class="shape-ind"><div class="ind-sq-x"></div></div>
+            <div class="n sqx">
+              <span class="ntag">ESCALATE — URGENT</span>
+              <div class="ntitle">Raise Phong trước</div>
+              <div class="nbody">Verify tracking thật, không ghost action</div>
+            </div>
+            <div class="vc arr"></div>
+            <div class="shape-ind"><div class="ind-sq"></div></div>
+            <div class="n sq">
+              <span class="ntag">QUYẾT ĐỊNH</span>
+              <div class="ntitle">SKU OOS ở Flexport?</div>
+            </div>
+            <!-- sub YES/NO -->
+            <div style="width:100%;">
+              <div style="display:flex;align-items:flex-end;height:28px;">
+                <div style="flex:1;height:2px;background:var(--bd2);align-self:flex-end;"></div>
+                <div style="width:2px;height:28px;background:var(--bd2);flex-shrink:0;"></div>
+                <div style="flex:1;height:2px;background:var(--bd2);align-self:flex-end;"></div>
+              </div>
+              <div style="display:flex;align-items:flex-start;">
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:0 4px;">
+                  <div class="vc-label">CÓ</div>
+                  <div class="vc arr"></div>
+                  <div class="shape-ind"><div class="ind-sq-x"></div></div>
+                  <div class="n sqx" style="width:130px;">
+                    <span class="ntag">ESCALATE</span>
+                    <div class="ntitle">Phong duyệt Substitute</div>
+                  </div>
+                  <div class="vc arr"></div>
+                  <div class="shape-ind"><div class="ind-tri"></div></div>
+                  <div class="n tri" style="width:130px;">
+                    <span class="ntag">KẾT QUẢ</span>
+                    <div class="ntitle">WNSJRS2023 → WNPSGS2024</div>
+                  </div>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:0 4px;">
+                  <div class="vc-label">KHÔNG</div>
+                  <div class="vc arr"></div>
+                  <div class="shape-ind"><div class="ind-tri"></div></div>
+                  <div class="n tri" style="width:130px;">
+                    <span class="ntag">KẾT QUẢ</span>
+                    <div class="ntitle">Route Flexport</div>
+                    <div class="nbody">Lark "Best cannot ship" → Tạo order</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- KHÔNG → bình thường -->
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:0 6px;">
+            <div class="vc-label">KHÔNG</div>
+            <div class="vc arr"></div>
+            <div class="shape-ind"><div class="ind-tri"></div></div>
+            <div class="n tri">
+              <span class="ntag">KẾT QUẢ</span>
+              <div class="ntitle">Ship bình thường</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="special-card amber">
-      <span class="sc-tag">⚠ OPS: RAM PRESSURE / BRIDGE KẸT</span>
-      <div class="sc-title">macmini: alive-but-not-polling</div>
-      <ul>
-        <li>RAM pressure → bridge kẹt, không poll email</li>
-        <li>Fix: giảm tải / reboot sạch</li>
-        <li>Chrome 9222 cần launchd KeepAlive</li>
-        <li>Email khách không mất (ở inbox)</li>
-        <li>Rep tay phải sync-back (\Seen + replied_message_ids)</li>
-      </ul>
+
+    <div class="sit-div"></div>
+
+    <!-- TH2: Cancel sub trước khi ship -->
+    <div class="sit">
+      <div class="sit-label">Tình huống 2 — Cancel sub trước khi ship</div>
+      <div class="shape-ind"><div class="ind-sq"></div></div>
+      <div class="n sq">
+        <span class="ntag">QUYẾT ĐỊNH</span>
+        <div class="ntitle">Khách muốn cancel subscription?</div>
+      </div>
+      <div class="vc arr"></div>
+      <div class="shape-ind"><div class="ind-sq"></div></div>
+      <div class="n sq">
+        <span class="ntag">QUYẾT ĐỊNH</span>
+        <div class="ntitle">Đủ 120 ngày cam kết?</div>
+      </div>
+      <div style="width:100%;">
+        <div style="display:flex;align-items:flex-end;height:28px;">
+          <div style="flex:1;height:2px;background:var(--bd2);align-self:flex-end;"></div>
+          <div style="width:2px;height:28px;background:var(--bd2);flex-shrink:0;"></div>
+          <div style="flex:1;height:2px;background:var(--bd2);align-self:flex-end;"></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;">
+          <!-- < 120 -->
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:0 6px;">
+            <div class="vc-label">&lt; 120 ngày</div>
+            <div class="vc arr"></div>
+            <div class="shape-ind"><div class="ind-sq-b"></div></div>
+            <div class="n sqb">
+              <span class="ntag">CHẶN</span>
+              <div class="ntitle">POLICY DECLINE</div>
+              <div class="nbody">Offer: pause / skip / reschedule<div class="nwarn">⛔ Cần Phong/Bao nếu ngoại lệ</div></div>
+            </div>
+          </div>
+          <!-- ≥ 120 → Retention Ladder -->
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:0 6px;">
+            <div class="vc-label">≥ 120 ngày</div>
+            <div class="vc arr"></div>
+            <div class="shape-ind"><div class="ind-sq"></div></div>
+            <div class="n sq">
+              <span class="ntag">QUYẾT ĐỊNH</span>
+              <div class="ntitle">Charge window ≤ 7 ngày?</div>
+              <div class="nbody">→ CÓ: Skip/Pause TRƯỚC<div class="nwarn">⚠ PUT next_charge = CẤM</div></div>
+            </div>
+            <div class="vc arr"></div>
+            <div class="shape-ind"><div class="ind-sq"></div></div>
+            <div class="n sq">
+              <span class="ntag">QUYẾT ĐỊNH — RETENTION</span>
+              <div class="ntitle">T1 → T2 → T3 → T4</div>
+              <div class="nbody"><strong>T1</strong> Delay/pause/skip (offer đầu)<br><strong>T2</strong> Downsale · <strong>T3</strong> Credits<br><strong>T4</strong> Cancel — sau T1-3 thất bại</div>
+            </div>
+            <div class="vc arr"></div>
+            <div class="shape-ind"><div class="ind-tri"></div></div>
+            <div class="n tri">
+              <span class="ntag">KẾT QUẢ</span>
+              <div class="ntitle">Execute → Verify → Log</div>
+              <div class="nbody">Recharge → Re-fetch → Mail → Log</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+
+  </div>
+</div>
+
+<div class="vc arr" style="height:36px;"></div>
+
+<!-- ════════════════════════════════════════
+     PHASE 3 — ĐANG GIAO HÀNG
+════════════════════════════════════════ -->
+<div class="phase">
+  <div class="pbar"><div class="pl"></div><div class="pt">Giai đoạn 3 — Đang giao hàng</div><div class="pl"></div></div>
+
+  <div class="n ev">
+    <span class="ntag">SỰ KIỆN</span>
+    <div class="ntitle">Đơn đang vận chuyển</div>
+    <div class="nbody">Tracking đã có</div>
   </div>
 
-</div><!-- /container -->
+  <div class="vc arr"></div>
+  <div class="vc-label">Các tình huống có thể xảy ra</div>
+  <div class="vc sm"></div>
 
-<footer>PATI GROUP — Internal CS & Fulfillment SOP · Confidential · Phong / Kevin authority</footer>
+  <div class="sit-strip">
 
-<script>
-function showBranch(id, tab) {
-  document.querySelectorAll('.branch-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.branch-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('panel-' + id).classList.add('active');
-  tab.classList.add('active');
-}
-</script>
+    <!-- TH1: WISMO -->
+    <div class="sit">
+      <div class="sit-label">Tình huống 1 — WISMO</div>
+      <div class="shape-ind"><div class="ind-sq"></div></div>
+      <div class="n sq">
+        <span class="ntag">QUYẾT ĐỊNH</span>
+        <div class="ntitle">Khách hỏi hàng đâu?</div>
+        <div class="nbody">Where Is My Order</div>
+      </div>
+      <div class="vc arr"></div>
+      <div class="shape-ind"><div class="ind-tri"></div></div>
+      <div class="n tri">
+        <span class="ntag">KẾT QUẢ</span>
+        <div class="ntitle">Tra 17track → Cập nhật khách</div>
+        <div class="nbody">Stuck &gt; ngưỡng → reship</div>
+      </div>
+    </div>
+
+    <div class="sit-div"></div>
+
+    <!-- TH2: Thất lạc / giao thất bại -->
+    <div class="sit">
+      <div class="sit-label">Tình huống 2 — Thất lạc / giao thất bại</div>
+      <div class="shape-ind"><div class="ind-sq"></div></div>
+      <div class="n sq">
+        <span class="ntag">QUYẾT ĐỊNH</span>
+        <div class="ntitle">Thất lạc hoặc giao thất bại?</div>
+      </div>
+      <div class="vc arr"></div>
+      <div class="shape-ind"><div class="ind-sq"></div></div>
+      <div class="n sq">
+        <span class="ntag">QUYẾT ĐỊNH</span>
+        <div class="ntitle">Khách đòi refund hay cần hàng?</div>
+      </div>
+      <div style="width:100%;">
+        <div style="display:flex;align-items:flex-end;height:28px;">
+          <div style="flex:1;height:2px;background:var(--bd2);align-self:flex-end;"></div>
+          <div style="width:2px;height:28px;background:var(--bd2);flex-shrink:0;"></div>
+          <div style="flex:1;height:2px;background:var(--bd2);align-self:flex-end;"></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;">
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:0 6px;">
+            <div class="vc-label">Cần hàng</div>
+            <div class="vc arr"></div>
+            <div class="shape-ind"><div class="ind-tri"></div></div>
+            <div class="n tri">
+              <span class="ntag">KẾT QUẢ</span>
+              <div class="ntitle">RESHIP</div>
+              <div class="nbody">Gửi replacement. Không refund.</div>
+            </div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:0 6px;">
+            <div class="vc-label">Đòi refund</div>
+            <div class="vc arr"></div>
+            <div class="shape-ind"><div class="ind-sq-b"></div></div>
+            <div class="n sqb">
+              <span class="ntag">CHẶN</span>
+              <div class="ntitle">KHÔNG refund</div>
+              <div class="nbody">Policy: thất lạc → chỉ THAY THẾ. Raise Phong.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sit-div"></div>
+
+    <!-- TH3: Kẹt vận chuyển -->
+    <div class="sit">
+      <div class="sit-label">Tình huống 3 — Kẹt vận chuyển</div>
+      <div class="shape-ind"><div class="ind-sq"></div></div>
+      <div class="n sq">
+        <span class="ntag">QUYẾT ĐỊNH</span>
+        <div class="ntitle">Kẹt vận chuyển lâu?</div>
+      </div>
+      <div class="vc arr"></div>
+      <div class="shape-ind"><div class="ind-tri"></div></div>
+      <div class="n tri">
+        <span class="ntag">KẾT QUẢ</span>
+        <div class="ntitle">Reship (BestFulfill)</div>
+        <div class="nbody">Cập nhật tracking mới cho khách sau reship</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="vc arr" style="height:36px;"></div>
+
+<!-- ════════════════════════════════════════
+     PHASE 4 — SAU KHI NHẬN HÀNG
+════════════════════════════════════════ -->
+<div class="phase">
+  <div class="pbar"><div class="pl"></div><div class="pt">Giai đoạn 4 — Sau khi nhận hàng</div><div class="pl"></div></div>
+
+  <div class="n ev">
+    <span class="ntag">SỰ KIỆN</span>
+    <div class="ntitle">Khách đã nhận hàng</div>
+    <div class="nbody">Giao thành công</div>
+  </div>
+
+  <div class="vc arr"></div>
+  <div class="vc-label">Các tình huống có thể xảy ra</div>
+  <div class="vc sm"></div>
+
+  <div class="sit-strip">
+
+    <!-- TH1: Hỏng / sai -->
+    <div class="sit">
+      <div class="sit-label">Tình huống 1 — Hỏng / sai SP</div>
+      <div class="shape-ind"><div class="ind-sq"></div></div>
+      <div class="n sq">
+        <span class="ntag">QUYẾT ĐỊNH</span>
+        <div class="ntitle">Hỏng / sai sản phẩm?</div>
+      </div>
+      <div class="vc arr"></div>
+      <div class="shape-ind"><div class="ind-sq-b"></div></div>
+      <div class="n sqb">
+        <span class="ntag">CHẶN</span>
+        <div class="ntitle">KHÔNG refund</div>
+        <div class="nbody">Gửi THAY THẾ. Raise Phong nếu phức tạp.</div>
+      </div>
+    </div>
+
+    <div class="sit-div"></div>
+
+    <!-- TH2: Khiếu nại / MBG -->
+    <div class="sit">
+      <div class="sit-label">Tình huống 2 — Khiếu nại / Đòi refund</div>
+      <div class="shape-ind"><div class="ind-sq-x"></div></div>
+      <div class="n sqx">
+        <span class="ntag">ESCALATE NGAY</span>
+        <div class="ntitle">Raise Phong</div>
+        <div class="nbody">Agent KHÔNG tự quyết refund</div>
+      </div>
+      <div class="vc arr"></div>
+      <div class="shape-ind"><div class="ind-sq"></div></div>
+      <div class="n sq">
+        <span class="ntag">QUYẾT ĐỊNH</span>
+        <div class="ntitle">Fit 90-day MBG?</div>
+        <div class="nbody">① Đơn ĐẦU của SP · ② ≤ 3 units · ③ Trong 90 ngày từ NHẬN · ④ Dùng ≥ 2 tuần</div>
+      </div>
+      <div style="width:100%;">
+        <div style="display:flex;align-items:flex-end;height:28px;">
+          <div style="flex:1;height:2px;background:var(--bd2);align-self:flex-end;"></div>
+          <div style="width:2px;height:28px;background:var(--bd2);flex-shrink:0;"></div>
+          <div style="flex:1;height:2px;background:var(--bd2);align-self:flex-end;"></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;">
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:0 6px;">
+            <div class="vc-label">Đủ 4 điều kiện</div>
+            <div class="vc arr"></div>
+            <div class="shape-ind"><div class="ind-tri"></div></div>
+            <div class="n tri">
+              <span class="ntag">KẾT QUẢ</span>
+              <div class="ntitle">Refund 100% giá SP</div>
+              <div class="nbody">Không gồm ship/thuế/HQ. Không cần trả hàng.</div>
+            </div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:0 6px;">
+            <div class="vc-label">Không đủ</div>
+            <div class="vc arr"></div>
+            <div class="shape-ind"><div class="ind-tri-b"></div></div>
+            <div class="n trib">
+              <span class="ntag">KẾT QUẢ</span>
+              <div class="ntitle">Decline + Offer thay thế</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sit-div"></div>
+
+    <!-- TH3: Cancel subscription -->
+    <div class="sit">
+      <div class="sit-label">Tình huống 3 — Cancel subscription</div>
+      <div class="shape-ind"><div class="ind-sq"></div></div>
+      <div class="n sq">
+        <span class="ntag">QUYẾT ĐỊNH</span>
+        <div class="ntitle">Khách muốn cancel sub?</div>
+      </div>
+      <div class="vc arr"></div>
+      <div class="shape-ind"><div class="ind-sq"></div></div>
+      <div class="n sq">
+        <span class="ntag">QUYẾT ĐỊNH</span>
+        <div class="ntitle">Đủ 120 ngày cam kết?</div>
+      </div>
+      <div style="width:100%;">
+        <div style="display:flex;align-items:flex-end;height:28px;">
+          <div style="flex:1;height:2px;background:var(--bd2);align-self:flex-end;"></div>
+          <div style="width:2px;height:28px;background:var(--bd2);flex-shrink:0;"></div>
+          <div style="flex:1;height:2px;background:var(--bd2);align-self:flex-end;"></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;">
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:0 6px;">
+            <div class="vc-label">&lt; 120 ngày</div>
+            <div class="vc arr"></div>
+            <div class="shape-ind"><div class="ind-sq-b"></div></div>
+            <div class="n sqb">
+              <span class="ntag">CHẶN</span>
+              <div class="ntitle">POLICY DECLINE</div>
+              <div class="nbody">Offer pause/skip/reschedule<div class="nwarn">⛔ Cần Phong/Bao nếu ngoại lệ</div></div>
+            </div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:0 6px;">
+            <div class="vc-label">≥ 120 ngày</div>
+            <div class="vc arr"></div>
+            <div class="shape-ind"><div class="ind-sq"></div></div>
+            <div class="n sq">
+              <span class="ntag">QUYẾT ĐỊNH</span>
+              <div class="ntitle">Charge window ≤ 7 ngày?</div>
+              <div class="nbody">CÓ → Skip/Pause TRƯỚC<div class="nwarn">⚠ PUT next_charge = CẤM</div></div>
+            </div>
+            <div class="vc arr"></div>
+            <div class="shape-ind"><div class="ind-sq"></div></div>
+            <div class="n sq">
+              <span class="ntag">QUYẾT ĐỊNH</span>
+              <div class="ntitle">Retention Ladder T1→T4</div>
+              <div class="nbody"><strong>T1</strong> Delay/pause · <strong>T2</strong> Downsale<br><strong>T3</strong> Credits · <strong>T4</strong> Cancel</div>
+            </div>
+            <div class="vc arr"></div>
+            <div class="shape-ind"><div class="ind-tri"></div></div>
+            <div class="n tri">
+              <span class="ntag">KẾT QUẢ</span>
+              <div class="ntitle">Execute → Verify → Log</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="vc arr" style="height:36px;"></div>
+
+<!-- ════════════════════════════════════════
+     PHASE 5 — DISPUTE / CHARGEBACK
+════════════════════════════════════════ -->
+<div class="phase">
+  <div class="pbar"><div class="pl"></div><div class="pt">Giai đoạn 5 — Dispute / Chargeback</div><div class="pl"></div></div>
+
+  <div class="n ev">
+    <span class="ntag">SỰ KIỆN</span>
+    <div class="ntitle">Dispute nổ</div>
+    <div class="nbody">Bank / PayPal / Shopify → ChargeFlow</div>
+  </div>
+
+  <div class="vc arr"></div>
+  <!-- Always first: raise Phong -->
+  <div class="shape-ind"><div class="ind-sq-x"></div></div>
+  <div class="n sqx" style="width:260px;">
+    <span class="ntag">ESCALATE — URGENT — LUÔN LÀM TRƯỚC</span>
+    <div class="ntitle">Raise Phong ngay</div>
+    <div class="nbody">KHÔNG để "no merchant action" → mất hạn nộp evidence</div>
+  </div>
+
+  <div class="vc arr"></div>
+  <div class="vc-label">Phân loại dispute</div>
+  <div class="vc sm"></div>
+
+  <div class="sit-strip">
+
+    <!-- TH1: Apr29 -->
+    <div class="sit">
+      <div class="sit-label">Tình huống 1 — Nguồn gốc dispute</div>
+      <div class="shape-ind"><div class="ind-sq"></div></div>
+      <div class="n sq">
+        <span class="ntag">QUYẾT ĐỊNH</span>
+        <div class="ntitle">Từ Apr29 migration?</div>
+        <div class="nbody">SKU charge đầu ≠ sub hiện tại + updated 29/04</div>
+      </div>
+      <div style="width:100%;">
+        <div style="display:flex;align-items:flex-end;height:28px;">
+          <div style="flex:1;height:2px;background:var(--bd2);align-self:flex-end;"></div>
+          <div style="width:2px;height:28px;background:var(--bd2);flex-shrink:0;"></div>
+          <div style="flex:1;height:2px;background:var(--bd2);align-self:flex-end;"></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;">
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:0 6px;">
+            <div class="vc-label">Đúng Apr29</div>
+            <div class="vc arr"></div>
+            <div class="shape-ind"><div class="ind-sq-b"></div></div>
+            <div class="n sqb">
+              <span class="ntag">CHẶN</span>
+              <div class="ntitle">KHÔNG fight — Concede</div>
+              <div class="nbody">Lỗi internal. Phong/Kevin quyết: refund/concede.</div>
+            </div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:0 6px;">
+            <div class="vc-label">Dispute thường</div>
+            <div class="vc arr"></div>
+            <div class="shape-ind"><div class="ind-tri"></div></div>
+            <div class="n tri">
+              <span class="ntag">KẾT QUẢ</span>
+              <div class="ntitle">ChargeFlow tự fight</div>
+              <div class="nbody">Tag "Proceed" → SaaS xử lý. Chrome 9222 giám sát + evidence.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sit-div"></div>
+
+    <!-- TH2: Infra check -->
+    <div class="sit">
+      <div class="sit-label">Tình huống 2 — Hạ tầng</div>
+      <div class="shape-ind"><div class="ind-sq"></div></div>
+      <div class="n sq">
+        <span class="ntag">QUYẾT ĐỊNH</span>
+        <div class="ntitle">Hạ tầng sống?</div>
+        <div class="nbody">Chrome port 9222 đang chạy? Session ChargeFlow login?</div>
+      </div>
+      <div class="vc arr"></div>
+      <div class="shape-ind"><div class="ind-tri"></div></div>
+      <div class="n tri">
+        <span class="ntag">KẾT QUẢ</span>
+        <div class="ntitle">Submit evidence</div>
+        <div class="nbody">cf_triage → chargeflow_dispute_monitor.py --submit<div class="nwarn">⚠ KHÔNG dùng port 9223</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="vc arr" style="height:36px;"></div>
+
+<!-- ════════════════════════════════════════
+     PHASE 6 — KHÁCH LEO THANG
+════════════════════════════════════════ -->
+<div class="phase">
+  <div class="pbar"><div class="pl"></div><div class="pt">Giai đoạn 6 — Khách leo thang / Đe doạ (bất kỳ giai đoạn nào)</div><div class="pl"></div></div>
+
+  <div class="n ev">
+    <span class="ntag">SỰ KIỆN</span>
+    <div class="ntitle">Khách giận / đe doạ / loop</div>
+    <div class="nbody">Review / legal / scam</div>
+  </div>
+  <div class="vc arr"></div>
+  <div class="shape-ind"><div class="ind-sq-x"></div></div>
+  <div class="n sqx" style="width:300px;">
+    <span class="ntag">ESCALATE — Loop de-escalation</span>
+    <div class="ntitle">Đưa người thật vào ngay</div>
+    <div class="nbody">
+      ① Cắt loop sớm — không để escalate tiếp<br>
+      ② Đưa người thật xử lý (không để bot tiếp tục)<br>
+      ③ Giải quyết cụ thể, không hứa chung chung<br>
+      ④ KHÔNG để leo thang → scam review / legal
+    </div>
+  </div>
+</div>
+
+<!-- ══ GUARDRAILS ══ -->
+<div class="sec-head">Guardrails — Áp dụng TRƯỚC mọi hành động</div>
+<div class="g-grid">
+  <div class="g-card"><div class="g-id">G1</div><div><div class="g-title">Urgent escalate</div><div class="g-desc">refund / dispute / fulfill = URGENT → raise Phong TRƯỚC; không tự xử / cam kết</div></div></div>
+  <div class="g-card"><div class="g-id">G2</div><div><div class="g-title">Không tự quyết refund</div><div class="g-desc">Mọi case refund → Phong quyết. Không ngoại lệ.</div></div></div>
+  <div class="g-card"><div class="g-id">G3</div><div><div class="g-title">Cancel = giải pháp CUỐI</div><div class="g-desc">Check policy trước. Phải qua T1→T3 trước T4.</div></div></div>
+  <div class="g-card"><div class="g-id">G4</div><div><div class="g-title">Verify mọi write</div><div class="g-desc">Recharge/Shopify → re-fetch xác nhận. Không "ghost action".</div></div></div>
+  <div class="g-card"><div class="g-id">G5</div><div><div class="g-title">Không bulk edit không có 4-eye</div><div class="g-desc">Recharge bulk edit → bắt buộc 4-eye review. Bài học từ Apr29.</div></div></div>
+  <div class="g-card"><div class="g-id">G6</div><div><div class="g-title">Ops / Infra macmini</div><div class="g-desc">Stealth cho việc của Phong. Backup trước khi sửa. macOS = launchd.</div></div></div>
+</div>
+
+<!-- ══ SOURCE OF TRUTH ══ -->
+<div class="sec-head">Source of Truth — Thứ tự ưu tiên</div>
+<div class="sot-bar">
+  <span class="sot-lbl">ƯU TIÊN</span>
+  <div class="sot-i"><span class="n2">①</span> Policy Kevin / Phong ban hành</div>
+  <span class="sot-sep">›</span>
+  <div class="sot-i"><span class="n2">②</span> Skill macmini</div>
+  <span class="sot-sep">›</span>
+  <div class="sot-i"><span class="n2">③</span> Memory / Observation</div>
+  <span class="sot-sep">›</span>
+  <div class="sot-i"><span class="n2">④</span> Live system (Recharge / Shopify / ChargeFlow)</div>
+</div>
+<div class="sot-note">⚠ Khi nguồn mâu thuẫn → Policy ban hành THẮNG · Verify-first trước mọi khẳng định · Lệch policy → KHÔNG làm ngay, confirm lại</div>
+
+<!-- ══ SPECIAL CASES ══ -->
+<div class="sec-head">Case đặc biệt</div>
+<div class="sc-grid">
+  <div class="sc-card coral">
+    <span class="sc-tag">⚠ APR29 MIGRATION VICTIMS</span>
+    <div class="sc-title">756 sub migrate sang ShilaSource sai</div>
+    <ul>
+      <li>Nhận diện: SKU charge đầu ≠ sub hiện tại + updated 29/04</li>
+      <li>Remedy: Phong/Kevin quyết (replacement / exception)</li>
+      <li>KHÔNG refund mặc định · Chargeback nhóm này đang nổ</li>
+      <li>Dispute từ Apr29 → KHÔNG fight, concede</li>
+    </ul>
+  </div>
+  <div class="sc-card amber">
+    <span class="sc-tag">⚠ OPS — RAM PRESSURE / BRIDGE KẸT</span>
+    <div class="sc-title">macmini: alive-but-not-polling</div>
+    <ul>
+      <li>RAM pressure → bridge kẹt, không poll email</li>
+      <li>Fix: giảm tải / reboot sạch</li>
+      <li>Chrome 9222 cần launchd KeepAlive</li>
+      <li>Email khách không mất (ở inbox)</li>
+      <li>Rep tay phải sync-back (\Seen + replied_message_ids)</li>
+    </ul>
+  </div>
+</div>
+
+</div>
+<footer>PATI GROUP — Internal CS & Fulfillment SOP · Confidential · Phong / Kevin authority · v3 Customer Journey</footer>
 </body>
 </html>
