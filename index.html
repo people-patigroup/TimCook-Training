@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PATI CS & Fulfillment — Decision Tree</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f12;
+    --bg2: #13161a;
+    --bg3: #1a1e24;
+    --border: #262b32;
+    --border2: #2e343c;
+    --text: #e2e6ed;
+    --text2: #8a9099;
+    --text3: #545b64;
+
+    --teal:   #1ecfaa;
+    --teal-bg: rgba(30,207,170,.08);
+    --teal-border: rgba(30,207,170,.3);
+
+    --amber:  #f0a040;
+    --amber-bg: rgba(240,160,64,.08);
+    --amber-border: rgba(240,160,64,.3);
+
+    --coral:  #e05252;
+    --coral-bg: rgba(224,82,82,.08);
+    --coral-border: rgba(224,82,82,.3);
+
+    --purple: #9b7ff4;
+    --purple-bg: rgba(155,127,244,.08);
+    --purple-border: rgba(155,127,244,.3);
+
+    --blue:   #4fa3e8;
+    --blue-bg: rgba(79,163,232,.08);
+    --blue-border: rgba(79,163,232,.3);
+
+    --green:  #5cb85c;
+    --green-bg: rgba(92,184,92,.08);
+    --green-border: rgba(92,184,92,.3);
+
+    --gray-bg: rgba(255,255,255,.04);
+    --gray-border: rgba(255,255,255,.12);
+
+    --radius: 8px;
+    --font-mono: 'IBM Plex Mono', monospace;
+    --font-sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--teal);
+    letter-spacing: .12em;
+    background: var(--teal-bg);
+    border: 1px solid var(--teal-border);
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+  header h1 {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  header p { font-size: 12px; color: var(--text3); font-family: var(--font-mono); }
+  .header-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .badge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 3px;
+    letter-spacing: .06em;
+  }
+  .badge.urgent { background: var(--coral-bg); border: 1px solid var(--coral-border); color: var(--coral); }
+  .badge.version { background: var(--gray-bg); border: 1px solid var(--gray-border); color: var(--text3); }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 1280px; margin: 0 auto; padding: 32px 24px; }
+
+  /* ── LEGEND ── */
+  .legend {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+    padding: 14px 18px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    color: var(--text2);
+    font-family: var(--font-mono);
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: var(--bg3);
+  }
+  .legend-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+
+  /* ── ENTRY NODE ── */
+  .entry-wrapper { display: flex; justify-content: center; margin-bottom: 0; }
+  .entry-node {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 14px 32px;
+    text-align: center;
+    font-weight: 500;
+    font-size: 14px;
+    position: relative;
+  }
+  .entry-node .sub { font-size: 11px; color: var(--text3); font-family: var(--font-mono); margin-top: 3px; }
+
+  /* ── CONNECTOR ── */
+  .connector {
+    display: flex;
+    justify-content: center;
+    padding: 6px 0;
+  }
+  .connector-line {
+    width: 1px;
+    height: 24px;
+    background: var(--border2);
+    position: relative;
+  }
+  .connector-line::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: -3px;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 6px solid var(--border2);
+  }
+
+  /* ── BRANCHES ROW ── */
+  .branches-wrapper {
+    position: relative;
+    margin: 0;
+  }
+  .branch-labels {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-bottom: 0;
+  }
+  .branch-tab {
+    text-align: center;
+    padding: 10px 8px 12px;
+    border-radius: 6px 6px 0 0;
+    cursor: pointer;
+    transition: all .2s;
+    border: 1px solid transparent;
+    border-bottom: none;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    position: relative;
+    top: 1px;
+  }
+  .branch-tab .tab-letter { font-size: 18px; font-weight: 600; display: block; margin-bottom: 3px; }
+  .branch-tab .tab-name { display: block; font-weight: 400; }
+  .branch-tab.teal   { background: var(--teal-bg);   border-color: var(--teal-border);   color: var(--teal); }
+  .branch-tab.amber  { background: var(--amber-bg);  border-color: var(--amber-border);  color: var(--amber); }
+  .branch-tab.coral  { background: var(--coral-bg);  border-color: var(--coral-border);  color: var(--coral); }
+  .branch-tab.blue   { background: var(--blue-bg);   border-color: var(--blue-border);   color: var(--blue); }
+  .branch-tab.green  { background: var(--green-bg);  border-color: var(--green-border);  color: var(--green); }
+  .branch-tab.gray   { background: var(--gray-bg);   border-color: var(--gray-border);   color: var(--text2); }
+  .branch-tab:hover { filter: brightness(1.15); transform: translateY(-1px); }
+  .branch-tab.active { filter: brightness(1.2); z-index: 2; }
+
+  /* ── BRANCH CONTENT ── */
+  .branches-content {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 0 0 var(--radius) var(--radius);
+    padding: 0;
+    overflow: hidden;
+  }
+  .branch-panel {
+    display: none;
+    padding: 24px;
+  }
+  .branch-panel.active { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+
+  /* ── NODE CARDS ── */
+  .node {
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    border: 1px solid;
+    position: relative;
+    cursor: default;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .node:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,.4); }
+  .node .node-tag {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .node .node-title { font-weight: 500; font-size: 13px; margin-bottom: 4px; }
+  .node .node-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
+  .node .node-warn {
+    margin-top: 8px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    padding: 5px 8px;
+    border-radius: 4px;
+    background: rgba(224,82,82,.12);
+    border: 1px solid var(--coral-border);
+    color: var(--coral);
+  }
+  .node.teal   { background: var(--teal-bg);   border-color: var(--teal-border); }
+  .node.amber  { background: var(--amber-bg);  border-color: var(--amber-border); }
+  .node.coral  { background: var(--coral-bg);  border-color: var(--coral-border); }
+  .node.purple { background: var(--purple-bg); border-color: var(--purple-border); }
+  .node.blue   { background: var(--blue-bg);   border-color: var(--blue-border); }
+  .node.green  { background: var(--green-bg);  border-color: var(--green-border); }
+  .node.gray   { background: var(--gray-bg);   border-color: var(--gray-border); }
+  .node.teal   .node-tag { color: var(--teal); }
+  .node.amber  .node-tag { color: var(--amber); }
+  .node.coral  .node-tag { color: var(--coral); }
+  .node.purple .node-tag { color: var(--purple); }
+  .node.blue   .node-tag { color: var(--blue); }
+  .node.green  .node-tag { color: var(--green); }
+  .node.gray   .node-tag { color: var(--text3); }
+
+  /* ── GUARDRAILS SECTION ── */
+  .section-title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .14em;
+    color: var(--text3);
+    text-transform: uppercase;
+    margin: 36px 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .guardrails {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  @media (max-width: 768px) {
+    .guardrails { grid-template-columns: 1fr 1fr; }
+    .branch-labels { grid-template-columns: repeat(3, 1fr); }
+    .branch-panel.active { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) {
+    .guardrails { grid-template-columns: 1fr; }
+    .branch-labels { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .guardrail-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    transition: border-color .2s;
+  }
+  .guardrail-card:hover { border-color: var(--border2); }
+  .guardrail-id {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 2px 7px;
+    border-radius: 3px;
+    white-space: nowrap;
+    margin-top: 1px;
+  }
+  .guardrail-body .g-title { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
+  .guardrail-body .g-desc  { font-size: 11px; color: var(--text2); line-height: 1.5; }
+
+  /* ── SOURCE OF TRUTH ── */
+  .sot-bar {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .sot-label { font-family: var(--font-mono); font-size: 10px; color: var(--text3); font-weight: 600; letter-spacing: .1em; margin-right: 6px; }
+  .sot-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    padding: 4px 10px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text2);
+    font-family: var(--font-mono);
+  }
+  .sot-item .pri { font-weight: 600; color: var(--teal); }
+  .sot-arrow { color: var(--text3); font-size: 12px; }
+  .sot-warn {
+    font-size: 11px;
+    color: var(--amber);
+    font-family: var(--font-mono);
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: var(--amber-bg);
+    border: 1px solid var(--amber-border);
+    border-radius: 4px;
+  }
+
+  /* ── SPECIAL CASES ── */
+  .special-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 600px) { .special-grid { grid-template-columns: 1fr; } }
+
+  .special-card {
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    border: 1px solid;
+  }
+  .special-card.coral { background: var(--coral-bg); border-color: var(--coral-border); }
+  .special-card.amber { background: var(--amber-bg); border-color: var(--amber-border); }
+  .special-card .sc-tag { font-family: var(--font-mono); font-size: 9px; font-weight: 600; letter-spacing: .1em; margin-bottom: 6px; display: block; }
+  .special-card.coral .sc-tag { color: var(--coral); }
+  .special-card.amber .sc-tag { color: var(--amber); }
+  .special-card .sc-title { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+  .special-card ul { padding-left: 14px; font-size: 12px; color: var(--text2); line-height: 1.7; }
+
+  footer {
+    text-align: center;
+    padding: 24px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text3);
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">PATI GROUP</div>
+  <div>
+    <h1>CS & Fulfillment — Decision Tree</h1>
+    <p>Customer Service · Dispute · Fulfillment · Guardrails</p>
+  </div>
+  <div class="header-right">
+    <span class="badge urgent">⚠ URGENT = Raise Phong trước</span>
+    <span class="badge version">v1.0 · 2025</span>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <span class="legend-item"><span class="legend-dot" style="background:var(--teal)"></span>Hành động thực thi</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--amber)"></span>Điều kiện / Check</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--coral)"></span>Chặn / Cảnh báo</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--purple)"></span>Escalate Phong</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--blue)"></span>Hệ thống / Tool</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>Xử lý giao hàng</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--text3)"></span>Kết thúc / Neutral</span>
+  </div>
+
+  <!-- ENTRY -->
+  <div class="entry-wrapper">
+    <div class="entry-node">
+      <div>📨 Email / Sự kiện từ khách hàng</div>
+      <div class="sub">Bước 0 — Phân loại intent (MECE, 6 nhánh loại trừ nhau)</div>
+    </div>
+  </div>
+  <div class="connector"><div class="connector-line"></div></div>
+
+  <!-- BRANCH TABS -->
+  <div class="branches-wrapper">
+    <div class="branch-labels">
+      <div class="branch-tab teal active" onclick="showBranch('A',this)">
+        <span class="tab-letter">A</span>
+        <span class="tab-name">Cancel / Pause / Skip</span>
+      </div>
+      <div class="branch-tab amber" onclick="showBranch('B',this)">
+        <span class="tab-letter">B</span>
+        <span class="tab-name">Refund</span>
+      </div>
+      <div class="branch-tab coral" onclick="showBranch('C',this)">
+        <span class="tab-letter">C</span>
+        <span class="tab-name">Dispute / Chargeback</span>
+      </div>
+      <div class="branch-tab blue" onclick="showBranch('D',this)">
+        <span class="tab-letter">D</span>
+        <span class="tab-name">Fulfillment</span>
+      </div>
+      <div class="branch-tab green" onclick="showBranch('E',this)">
+        <span class="tab-letter">E</span>
+        <span class="tab-name">Giao hàng / WISMO</span>
+      </div>
+      <div class="branch-tab gray" onclick="showBranch('F',this)">
+        <span class="tab-letter">F</span>
+        <span class="tab-name">Spam / Khác</span>
+      </div>
+    </div>
+
+    <div class="branches-content">
+
+      <!-- BRANCH A -->
+      <div class="branch-panel active" id="panel-A">
+        <div class="node teal">
+          <span class="node-tag">Bước 1</span>
+          <div class="node-title">Detect intent đa ngôn ngữ</div>
+          <div class="node-desc">EN / FR / DE / ES / IT<br>KHÔNG match: opt-out, hỏi-cách-huỷ đơn thuần</div>
+        </div>
+        <div class="node amber">
+          <span class="node-tag">Bước 2 — CHECK ĐẦU TIÊN</span>
+          <div class="node-title">Kiểm tra 120 ngày (cam kết 4 tháng)</div>
+          <div class="node-desc">
+            <strong>&lt; 120 ngày</strong> → POLICY DECLINE (không huỷ nếu không có Bao/Phong duyệt)<br>
+            → offer pause/skip/reschedule + báo ngày đủ điều kiện<br><br>
+            <strong>≥ 120 ngày</strong> → Đủ điều kiện, sang bước 3
+          </div>
+          <div class="node-warn">⛔ Không huỷ nếu chưa đủ 120 ngày (trừ khi Phong/Bao duyệt)</div>
+        </div>
+        <div class="node amber">
+          <span class="node-tag">Bước 3 — Charge Window</span>
+          <div class="node-title">next_charge ≤ 7 ngày?</div>
+          <div class="node-desc">
+            <strong>≤ 7 ngày</strong> → Skip/Pause TRƯỚC, KHÔNG cancel ngay<br>
+            <strong>Charge đã queued</strong> → Skip charge rồi mới pause<br>
+            <strong>&gt; 7 ngày</strong> → Vào Retention Ladder
+          </div>
+          <div class="node-warn">⚠ pause = SKIP queued charge. PUT next_charge = silent-fail — CẤM</div>
+        </div>
+        <div class="node teal">
+          <span class="node-tag">Bước 4 — Retention Ladder</span>
+          <div class="node-title">4 tầng xử lý (money out = cuối)</div>
+          <div class="node-desc">
+            <strong>T1</strong> DELAY — $0: pause 30/60/90, skip, reschedule, đổi tần suất → offer ĐẦU TIÊN<br>
+            <strong>T2</strong> DOWNSALE<br>
+            <strong>T3</strong> CREDITS<br>
+            <strong>T4</strong> CANCEL/REFUND — chỉ sau T1-3 bị từ chối, hoặc: defective / allergic / legal / 90-day MBG<br><br>
+            <em>Mood mapping: frustrated → T1+T3 · angry → T3/T4 · abusive → escalate</em>
+          </div>
+        </div>
+        <div class="node amber">
+          <span class="node-tag">Bước 5 — OTP</span>
+          <div class="node-title">Xác thực OTP</div>
+          <div class="node-desc">T1 → không cần OTP<br>T2, T3, T4 → cần OTP 6 số (hiệu lực 24h)</div>
+        </div>
+        <div class="node teal">
+          <span class="node-tag">Bước 6 — Execute</span>
+          <div class="node-title">Thực thi → Verify → Log</div>
+          <div class="node-desc">
+            Execute Recharge → Re-fetch xác nhận (verify) → Gửi mail xác nhận → Log<br><br>
+            <em>Refund trong T4 → vẫn theo Nhánh B (Phong quyết)</em>
+          </div>
+        </div>
+      </div>
+
+      <!-- BRANCH B -->
+      <div class="branch-panel" id="panel-B">
+        <div class="node purple">
+          <span class="node-tag">Nguyên tắc tối thượng</span>
+          <div class="node-title">⛔ Agent KHÔNG tự quyết refund</div>
+          <div class="node-desc">Mọi case refund → raise Phong kèm đánh giá trước khi phản hồi khách<br><br>Source of Truth = Policy Phong, KHÔNG theo skill cũ</div>
+        </div>
+        <div class="node teal">
+          <span class="node-tag">Case 1 — Được phép refund</span>
+          <div class="node-title">90-day Money Back Guarantee</div>
+          <div class="node-desc">
+            Đủ CẢ 4 điều kiện:<br>
+            ① Đơn ĐẦU của sản phẩm<br>
+            ② Tối đa 3 units<br>
+            ③ Trong 90 ngày từ ngày NHẬN hàng<br>
+            ④ Đã dùng ≥ 2 tuần<br><br>
+            → Hoàn 100% GIÁ SẢN PHẨM (KHÔNG bao gồm ship/thuế/hải quan, không cần trả hàng)
+          </div>
+        </div>
+        <div class="node teal">
+          <span class="node-tag">Case 2 — Được phép refund</span>
+          <div class="node-title">Huỷ trong 12h từ lúc đặt</div>
+          <div class="node-desc">Điều kiện: đơn đặt chưa quá 12h VÀ chưa ship</div>
+        </div>
+        <div class="node coral">
+          <span class="node-tag">KHÔNG refund — Các trường hợp</span>
+          <div class="node-title">Danh sách từ chối refund</div>
+          <div class="node-desc">
+            ✗ Sub renewal đã qua 12h & đã ship<br>
+            ✗ Khiếu nại mùi/vị/màu (ngoài MBG lần đầu)<br>
+            ✗ Dùng sai / bảo quản sai<br>
+            ✗ Mua bằng điểm / discount lớn<br>
+            ✗ Gian lận (nhiều account, mua sỉ)<br>
+            ✗ <strong>Hỏng / Sai / Thất lạc → CHỈ gửi THAY THẾ</strong>
+          </div>
+        </div>
+        <div class="node amber">
+          <span class="node-tag">Xử lý khi không fit</span>
+          <div class="node-title">Decline + Offer thay thế + Raise Phong</div>
+          <div class="node-desc">Decline lịch sự → offer replacement → vẫn raise Phong để loop xử lý</div>
+        </div>
+      </div>
+
+      <!-- BRANCH C -->
+      <div class="branch-panel" id="panel-C">
+        <div class="node purple">
+          <span class="node-tag">Bước 1 — URGENT</span>
+          <div class="node-title">Raise Phong ngay</div>
+          <div class="node-desc">KHÔNG để "no merchant action" → che mất hạn nộp evidence</div>
+        </div>
+        <div class="node blue">
+          <span class="node-tag">Bước 2 — ChargeFlow tự fight</span>
+          <div class="node-title">Đơn tag "Chargeflow: Proceed"</div>
+          <div class="node-desc">ChargeFlow SaaS tự xử lý server-side<br>Chrome CDP 9222 (logged app.chargeflow.io) = GIÁM SÁT + thêm evidence<br><em>cf_triage phân loại → chargeflow_dispute_monitor.py --submit</em></div>
+        </div>
+        <div class="node blue">
+          <span class="node-tag">Bước 3 — Infra bắt buộc</span>
+          <div class="node-title">Hạ tầng kỹ thuật</div>
+          <div class="node-desc">Chrome port 9222 phải sống (KHÔNG dùng 9223)<br>Session ChargeFlow phải login<br>Verify trước khi submit evidence</div>
+        </div>
+        <div class="node amber">
+          <span class="node-tag">Bước 4 — Check nguồn gốc</span>
+          <div class="node-title">Dispute từ Apr29 migration?</div>
+          <div class="node-desc">Nhận diện: SKU charge đầu ≠ sub hiện tại + updated 29/04</div>
+        </div>
+        <div class="node coral">
+          <span class="node-tag">Apr29 → xử lý đặc biệt</span>
+          <div class="node-title">KHÔNG fight — Concede</div>
+          <div class="node-desc">Lỗi internal của team → KHÔNG fight dispute<br>Phong/Kevin quyết: refund / concede<br>Chargeback nhóm này đang nổ → ưu tiên xử lý nhanh</div>
+        </div>
+      </div>
+
+      <!-- BRANCH D -->
+      <div class="branch-panel" id="panel-D">
+        <div class="node purple">
+          <span class="node-tag">Bước 1 — URGENT</span>
+          <div class="node-title">Raise Phong trước khi xử lý</div>
+          <div class="node-desc">Verify tracking thật, không ghost action</div>
+        </div>
+        <div class="node amber">
+          <span class="node-tag">Bước 2 — Best 3PL</span>
+          <div class="node-title">Best 3PL không ship được?</div>
+          <div class="node-desc">
+            <strong>Vùng không ship được / OOS / kẹt</strong> → Vào Lark "Best cannot ship" → Tạo Flexport order<br><br>
+            <strong>SKU OOS ở Flexport</strong> (vd WNSJRS2023) → Substitute Gold Grade WNPSGS2024 (cần Phong duyệt)<br><br>
+            <strong>Địa chỉ microstate</strong> (SM/MQ/LI): autocomplete + fill State → vẫn route được
+          </div>
+        </div>
+        <div class="node coral">
+          <span class="node-tag">Bước 3 — Partially paid</span>
+          <div class="node-title">Đơn partially_paid</div>
+          <div class="node-desc">CHỈ ship phần đã trả<br>Phần chưa trả → giữ lại / không ship<br>Raise Phong để xử lý phần còn lại</div>
+        </div>
+        <div class="node amber">
+          <span class="node-tag">Bước 4 — Địa chỉ sai</span>
+          <div class="node-title">Sai địa chỉ → Address verification protocol</div>
+          <div class="node-desc">Verify địa chỉ với khách trước khi ship<br>Cập nhật Recharge → Re-fetch xác nhận</div>
+        </div>
+        <div class="node teal">
+          <span class="node-tag">Bước 5 — Kẹt vận chuyển</span>
+          <div class="node-title">Reship (BestFulfill) + Update tracking</div>
+          <div class="node-desc">Không để kẹt vận chuyển lâu mà không xử lý<br>Cập nhật tracking cho khách sau reship</div>
+        </div>
+      </div>
+
+      <!-- BRANCH E -->
+      <div class="branch-panel" id="panel-E">
+        <div class="node amber">
+          <span class="node-tag">Phân loại</span>
+          <div class="node-title">WISMO / Thất lạc / Giao thất bại / Hỏng-sai-mất</div>
+          <div class="node-desc">Xác định đúng vấn đề trước khi xử lý</div>
+        </div>
+        <div class="node green">
+          <span class="node-tag">Xử lý WISMO</span>
+          <div class="node-title">Where Is My Order → Tra 17track</div>
+          <div class="node-desc">Tra tracking 17track → Cập nhật trạng thái cho khách<br>Nếu stuck &gt; ngưỡng → reship</div>
+        </div>
+        <div class="node coral">
+          <span class="node-tag">Thất lạc / Giao thất bại</span>
+          <div class="node-title">RESHIP — KHÔNG refund</div>
+          <div class="node-desc">Policy: gửi replacement, không hoàn tiền trong mọi trường hợp thất lạc/giao thất bại</div>
+        </div>
+        <div class="node coral">
+          <span class="node-tag">Hỏng / Sai sản phẩm</span>
+          <div class="node-title">THAY THẾ — KHÔNG refund</div>
+          <div class="node-desc">Gửi sản phẩm thay thế, không hoàn tiền<br>Raise Phong nếu case phức tạp</div>
+        </div>
+        <div class="node purple">
+          <span class="node-tag">Loop giận / Đe doạ</span>
+          <div class="node-title">Loop de-escalation</div>
+          <div class="node-desc">
+            ① Cắt loop sớm — không để escalate thêm<br>
+            ② Đưa người thật vào (không để bot xử lý tiếp)<br>
+            ③ Giải quyết cụ thể, không hứa hẹn chung chung<br>
+            ④ KHÔNG để leo thang → scam review / legal
+          </div>
+        </div>
+      </div>
+
+      <!-- BRANCH F -->
+      <div class="branch-panel" id="panel-F">
+        <div class="node gray">
+          <span class="node-tag">Spam / Bot</span>
+          <div class="node-title">Spam filter tự động</div>
+          <div class="node-desc">Word-boundary detection<br>Bot blocklist<br>Không cần xử lý thủ công</div>
+        </div>
+        <div class="node gray">
+          <span class="node-tag">Hỏi giá sỉ / B2B</span>
+          <div class="node-title">Không phải CS gấp</div>
+          <div class="node-desc">Route sang channel phù hợp<br>Không cần ưu tiên trong hàng đợi CS</div>
+        </div>
+        <div class="node gray">
+          <span class="node-tag">Khác</span>
+          <div class="node-title">Reply chung / Phân loại lại</div>
+          <div class="node-desc">Nếu sau khi reply thấy fit nhánh A-E → reclassify và xử lý theo đúng nhánh</div>
+        </div>
+      </div>
+
+    </div><!-- /branches-content -->
+  </div><!-- /branches-wrapper -->
+
+  <!-- ── GUARDRAILS ── -->
+  <div class="section-title">Guardrails — Áp dụng TRƯỚC mọi hành động</div>
+  <div class="guardrails">
+    <div class="guardrail-card">
+      <div class="guardrail-id">G1</div>
+      <div class="guardrail-body">
+        <div class="g-title">Urgent escalate</div>
+        <div class="g-desc">refund / dispute / fulfill = URGENT → raise Phong TRƯỚC khi xử với khách; không tự xử / cam kết</div>
+      </div>
+    </div>
+    <div class="guardrail-card">
+      <div class="guardrail-id">G2</div>
+      <div class="guardrail-body">
+        <div class="g-title">Không tự quyết refund</div>
+        <div class="g-desc">Mọi case refund → Phong quyết. Không có ngoại lệ.</div>
+      </div>
+    </div>
+    <div class="guardrail-card">
+      <div class="guardrail-id">G3</div>
+      <div class="guardrail-body">
+        <div class="g-title">Cancel = giải pháp CUỐI</div>
+        <div class="g-desc">Check policy trước, không phản xạ huỷ. Phải qua T1→T3 trước khi đến T4.</div>
+      </div>
+    </div>
+    <div class="guardrail-card">
+      <div class="guardrail-id">G4</div>
+      <div class="guardrail-body">
+        <div class="g-title">Verify mọi write</div>
+        <div class="g-desc">Mọi thao tác ghi Recharge/Shopify → re-fetch xác nhận. Không "ghost action".</div>
+      </div>
+    </div>
+    <div class="guardrail-card">
+      <div class="guardrail-id">G5</div>
+      <div class="guardrail-body">
+        <div class="g-title">Không bulk edit không có 4-eye</div>
+        <div class="g-desc">Recharge bulk edit → bắt buộc 4-eye review. Bài học từ Apr29.</div>
+      </div>
+    </div>
+    <div class="guardrail-card">
+      <div class="guardrail-id">G6</div>
+      <div class="guardrail-body">
+        <div class="g-title">Ops / Infra macmini</div>
+        <div class="g-desc">Stealth cho việc của Phong. Backup (bao-debug-) trước khi sửa. macOS = launchd.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SOURCE OF TRUTH ── -->
+  <div class="section-title">Source of Truth — Thứ tự ưu tiên</div>
+  <div class="sot-bar">
+    <span class="sot-label">ƯU TIÊN</span>
+    <div class="sot-item"><span class="pri">①</span>Policy Kevin / Phong ban hành</div>
+    <span class="sot-arrow">›</span>
+    <div class="sot-item"><span class="pri">②</span>Skill macmini</div>
+    <span class="sot-arrow">›</span>
+    <div class="sot-item"><span class="pri">③</span>Memory / Observation</div>
+    <span class="sot-arrow">›</span>
+    <div class="sot-item"><span class="pri">④</span>Live system (Recharge / Shopify / ChargeFlow)</div>
+  </div>
+  <div class="sot-warn">⚠ Khi nguồn mâu thuẫn → Policy ban hành THẮNG. Verify-first trước mọi khẳng định. Khi yêu cầu lệch policy → KHÔNG làm ngay, confirm lại.</div>
+
+  <!-- ── SPECIAL CASES ── -->
+  <div class="section-title">Case đặc biệt</div>
+  <div class="special-grid">
+    <div class="special-card coral">
+      <span class="sc-tag">⚠ APR29 MIGRATION VICTIMS</span>
+      <div class="sc-title">756 sub migrate sang ShilaSource sai</div>
+      <ul>
+        <li>Nhận diện: SKU charge đầu ≠ sub hiện tại + updated 29/04</li>
+        <li>Remedy: Phong/Kevin quyết (replacement / exception)</li>
+        <li>KHÔNG refund mặc định</li>
+        <li>Chargeback nhóm này đang nổ → ưu tiên</li>
+        <li>Dispute từ Apr29 → KHÔNG fight, concede</li>
+      </ul>
+    </div>
+    <div class="special-card amber">
+      <span class="sc-tag">⚠ OPS: RAM PRESSURE / BRIDGE KẸT</span>
+      <div class="sc-title">macmini: alive-but-not-polling</div>
+      <ul>
+        <li>RAM pressure → bridge kẹt, không poll email</li>
+        <li>Fix: giảm tải / reboot sạch</li>
+        <li>Chrome 9222 cần launchd KeepAlive</li>
+        <li>Email khách không mất (ở inbox)</li>
+        <li>Rep tay phải sync-back (\Seen + replied_message_ids)</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<footer>PATI GROUP — Internal CS & Fulfillment SOP · Confidential · Phong / Kevin authority</footer>
+
+<script>
+function showBranch(id, tab) {
+  document.querySelectorAll('.branch-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.branch-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  tab.classList.add('active');
+}
+</script>
+</body>
+</html>
